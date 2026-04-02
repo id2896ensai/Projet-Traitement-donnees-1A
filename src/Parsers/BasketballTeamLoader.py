@@ -1,5 +1,6 @@
 import pandas as pd
 from ..Model.team import Team
+from ..Model.team import Sport
 class BasketballTeamLoader:
     def load_teams():
         teams = []
@@ -13,6 +14,7 @@ class BasketballTeamLoader:
                         city=df[index, "city"],
                         state=df[index, "state"],
                         country=None,
-                        region=None)
+                        region=None,
+                        sport=Sport("basketball","ballon",10,"blabla",True))
             teams.append(team)
         
