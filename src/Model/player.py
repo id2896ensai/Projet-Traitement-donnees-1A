@@ -1,8 +1,8 @@
 from typing import Union
 from src.Common.utils import parse_boolean
+from .person import Person
 
-
-class Player:
+class Player(Person):
     """def __init__(self, id: int, full_name: str, is_the_goat: Union[str, bool]):
         self.id = id
         self.full_name = full_name
