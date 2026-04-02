@@ -14,7 +14,7 @@ class Player:
             display_string += " (GOAT)"
         return display_string
 """
-    def __init__(self,id,nom,prenom,date_de_naissance,sexe,poids,taille):
+    def __init__(self, id, nom, prenom, date_de_naissance, sexe, poids, taille):
         self.id = id
         self.nom = nom
         self.prenom = prenom
@@ -44,5 +44,3 @@ class Player:
     
     def filtre_sexe(self,sexe_recherche):
         return sexe_recherche == self.sexe
-    
-    def filtre_poids()
