@@ -1,4 +1,4 @@
-from src.Model.Player import Player
+from ...Model.player import Player
 
 
 def find_the_goat(players: list[Player]):
