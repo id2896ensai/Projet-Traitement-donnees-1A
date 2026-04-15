@@ -21,27 +21,35 @@ class BasketLoader(BaseLoader):
 
     def playerloader(self):
         data = self.data["players"]
-        data['id'] = data['person_id']
-        data['pseudo'] = data["jersey"]
-        data['nom'] = data['first_name']
-        data['prenom'] = data['last_name']
-        data['date_de_naissance'] = data['birthdate']
-        data['pays_de_naissance'] = None
-        data['sexe'] = 'M'
-        data['poids'] = data['weight']
-        data['taille'] = data['height']
-        data['role'] = data["position"]
-        data['team'] = data['team_id']
-
+        data["id"] = data["person_id"]
+        data["pseudo"] = data["jersey"]
+        data["nom"] = data["first_name"]
+        data["prenom"] = data["last_name"]
+        data["date_de_naissance"] = data["birthdate"]
+        data["pays_de_naissance"] = None
+        data["sexe"] = "M"
+        data["poids"] = data["weight"]
+        data["taille"] = data["height"]
+        data["role"] = data["position"]
+        data["team"] = data["team_id"]
 
     def teamloader(self):
         data = self.data["teams"]
+<<<<<<< HEAD
         data['team_api_id'] = None
         data['country'] = "USA"
         data['region'] = None
         data['nb_players'] = 0
         data['players'] = None
         data['sport'] = Sport('basketball', 'ballon', 10, 'blabla', True)
+=======
+        data["team_api_id"] = None
+        data["country"] = "USA"
+        data["region"] = None
+        data["nb_players"] = 0
+        data["players"] = None
+        data["sport"] = Sport("basketball", "ballon", 10, "blabla", True)
+>>>>>>> 8ff1289aaff2046c54facbf58ec08fc6936e773f
 
         """teams = [
             Team(
@@ -61,6 +69,7 @@ class BasketLoader(BaseLoader):
             for _, row in data.iterrows()
         ]"""
 
+<<<<<<< HEAD
         return data[[
             "id",
             "team_api_id",
@@ -79,3 +88,21 @@ class BasketLoader(BaseLoader):
         
         data["sport"] = Sport('basketball', 'ballon', 10, 'blabla', True)
         data['equipe_1'] = 
+=======
+        return data[
+            [
+                "id",
+                "team_api_id",
+                "full_name",
+                "abbreviation",
+                "nickname",
+                "city",
+                "state",
+                "country",
+                "region",
+            ]
+        ]
+
+    def matchloader(self):
+        data = self.data["games"]
+>>>>>>> 8ff1289aaff2046c54facbf58ec08fc6936e773f
