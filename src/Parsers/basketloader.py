@@ -94,3 +94,6 @@ class BasketLoader(BaseLoader):
 
     def matchloader(self):
         data = self.data['games']
+        
+        data["sport"] = Sport('basketball', 'ballon', 10, 'blabla', True)
+        data['equipe_1'] = 
