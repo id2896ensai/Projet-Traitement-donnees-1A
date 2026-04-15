@@ -4,20 +4,17 @@ from ..Model.sport import Sport
 from ..Model.player import Player
 import pandas as pd
 
+
 class BasketLoader(BaseLoader):
     pass
 
     def __init__(self, filepath):
         super().__init__(filepath)
 
-        self.files = {
-            "players" : "player.csv",
-            "games" : "game.csv",
-            "teams" : "team.csv"
-        }
+        self.files = {"players": "player.csv", "games": "game.csv", "teams": "team.csv"}
 
     def load_data(self):
-        for name,  file in self.files.items():
+        for name, file in self.files.items():
             path = self.filepath + "/" + file
             self.data[name] = pd.read_csv(path)
         return self.data
@@ -43,21 +40,7 @@ class BasketLoader(BaseLoader):
         data['country'] = "USA"
         data['region'] = None
         data['nb_players'] = 0
-        data['players'] = [
-            Player(
-                data['id'],
-                data['pseudo'],
-                data['nom'],
-                data['prenom'],
-                data['date_de_naissance'],
-                data['sexe'],
-                data['poids'],
-                data['taille'],
-                data['role'],
-                data['team']
-            )
-            for _, row in data.iterrows()
-        ]
+        data['players'] = None
         data['sport'] = Sport('basketball', 'ballon', 10, 'blabla', True)
 
         """teams = [
@@ -88,8 +71,7 @@ class BasketLoader(BaseLoader):
             "state",
             "country",
             "region",
-            "nb_players",
-            "sport"
+            
         ]]
 
     def matchloader(self):
