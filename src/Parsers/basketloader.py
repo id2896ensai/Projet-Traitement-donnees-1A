@@ -1,6 +1,7 @@
 from baseloader import BaseLoader
 from ..Model.team import Team
 from ..Model.sport import Sport
+from ..Model.player import Player
 import pandas as pd
 
 
@@ -17,6 +18,20 @@ class BasketLoader(BaseLoader):
             path = self.filepath + "/" + file
             self.data[name] = pd.read_csv(path)
         return self.data
+
+    def playerloader(self):
+        data = self.data["players"]
+        data["id"] = data["person_id"]
+        data["pseudo"] = data["jersey"]
+        data["nom"] = data["first_name"]
+        data["prenom"] = data["last_name"]
+        data["date_de_naissance"] = data["birthdate"]
+        data["pays_de_naissance"] = None
+        data["sexe"] = "M"
+        data["poids"] = data["weight"]
+        data["taille"] = data["height"]
+        data["role"] = data["position"]
+        data["team"] = data["team_id"]
 
     def teamloader(self):
         data = self.data["teams"]
@@ -58,3 +73,6 @@ class BasketLoader(BaseLoader):
                 "region",
             ]
         ]
+
+    def matchloader(self):
+        data = self.data["games"]

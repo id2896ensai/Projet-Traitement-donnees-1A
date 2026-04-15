@@ -1,6 +1,8 @@
 from typing import Union
 from src.Common.utils import parse_boolean
 from .person import Person
+from .team import Team
+
 
 class Player(Person):
     """def __init__(self, id: int, full_name: str, is_the_goat: Union[str, bool]):
@@ -14,14 +16,18 @@ class Player(Person):
             display_string += " (GOAT)"
         return display_string
 """
-    def __init__(self, id, nom, prenom, date_de_naissance, sexe, poids, taille):
+    def __init__(self, id, pseudo, nom, prenom, date_de_naissance, pays_de_naissance, sexe, poids, taille, role, team ):
         self.id = id
+        self.pseudo = pseudo
         self.nom = nom
         self.prenom = prenom
         self.date_de_naissance = date_de_naissance
+        self.pays_de_naissance = pays_de_naissance
         self.sexe = sexe
         self.poids = poids
         self.taille = taille
+        self.role = role
+        self.team = team
 
     def __str__(self):
         return "Athlete : " + self.nom + " " + self.prenom
