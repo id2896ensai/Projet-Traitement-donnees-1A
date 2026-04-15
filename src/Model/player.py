@@ -14,8 +14,9 @@ class Player(Person):
             display_string += " (GOAT)"
         return display_string
 """
-    def __init__(self, id, nom, prenom, date_de_naissance, sexe, poids, taille):
+    def __init__(self, id, pseudo, nom, prenom, date_de_naissance, sexe, poids, taille):
         self.id = id
+        self.pseudo = pseudo
         self.nom = nom
         self.prenom = prenom
         self.date_de_naissance = date_de_naissance

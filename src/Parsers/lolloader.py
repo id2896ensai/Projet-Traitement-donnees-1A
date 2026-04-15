@@ -1,6 +1,6 @@
 from baseloader import BaseLoader
 from ..Model.sport import Sport
-from ..Model.team import Team
+from ..Model.player import Player
 import pandas as pd
 
 
@@ -22,8 +22,20 @@ class LolLoader(BaseLoader):
             path = self.filepath + "/" + file
             self.data[name] = pd.read_csv(path)
         return self.data
+    
+    def playerloader(self):
+        data = self.data["teams"]
+        data['id'] = None
+        data['team_api_id'] = None
+        data['nickname'] = None
+        data['city'] = None
+        data['state'] = None
+        data['nb_players'] = 0
+        data['players'] = None
+        data['sport'] = Sport("LeagueOfLegends", "e-sport", 8, "blablabla", True)
 
-    def load_team(self):
+
+    def teamloader(self):
         data = self.data["teams"]
         data['id'] = None
         data['team_api_id'] = None
