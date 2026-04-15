@@ -25,8 +25,7 @@ class LolLoader(BaseLoader):
     
     def playerloader(self):
         data = self.data["teams"]
-        data['id'] = None
-        data['team_api_id'] = None
+        data['pseudo'] = None
         data['nickname'] = None
         data['city'] = None
         data['state'] = None
