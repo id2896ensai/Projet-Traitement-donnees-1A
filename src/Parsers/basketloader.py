@@ -1,6 +1,7 @@
 from baseloader import BaseLoader
 from ..Model.team import Team
 from ..Model.sport import Sport
+from ..Model.player import Player
 import pandas as pd
 
 class BasketLoader(BaseLoader):
@@ -21,13 +22,42 @@ class BasketLoader(BaseLoader):
             self.data[name] = pd.read_csv(path)
         return self.data
 
+    def playerloader(self):
+        data = self.data["players"]
+        data['id'] = data['person_id']
+        data['pseudo'] = data["jersey"]
+        data['nom'] = data['first_name']
+        data['prenom'] = data['last_name']
+        data['date_de_naissance'] = data['birthdate']
+        data['pays_de_naissance'] = None
+        data['sexe'] = 'M'
+        data['poids'] = data['weight']
+        data['taille'] = data['height']
+        data['role'] = data["position"]
+        data['team'] = data['team_id']
+
+
     def teamloader(self):
         data = self.data["teams"]
         data['team_api_id'] = None
         data['country'] = "USA"
         data['region'] = None
         data['nb_players'] = 0
-        data['players'] = None
+        data['players'] = [
+            Player(
+                data['id'],
+                data['pseudo'],
+                data['nom'],
+                data['prenom'],
+                data['date_de_naissance'],
+                data['sexe'],
+                data['poids'],
+                data['taille'],
+                data['role'],
+                data['team']
+            )
+            for _, row in data.iterrows()
+        ]
         data['sport'] = Sport('basketball', 'ballon', 10, 'blabla', True)
 
         """teams = [
@@ -58,5 +88,9 @@ class BasketLoader(BaseLoader):
             "state",
             "country",
             "region",
-            
+            "nb_players",
+            "sport"
         ]]
+
+    def matchloader(self):
+        data = self.data['games']
