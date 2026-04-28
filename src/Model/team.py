@@ -1,48 +1,42 @@
-from .player import Player
-from .sport import Sport
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+from src.Model.participant import Participant
+from src.Model.sport import Sport
+
+if TYPE_CHECKING:
+    from src.Model.player import Player
 
 
-class Team:
-    """Classe modélisant une équipe"""
+class Team(Participant):
+    """A sports team — participant in collective-sport matches."""
 
     def __init__(
         self,
-        id: int,
-        team_api_id: int | None,
         full_name: str,
-        abbreviation: str,
-        nickname: str | None,
-        city: str | None,
-        state: str | None,
-        country: str | None,
-        region: str | None,
-        nb_players: int,
-        players: list[Player],
-        sport: Sport
+        sport: Sport,
+        id: int | None = None,
+        abbreviation: str | None = None,
+        nickname: str | None = None,
+        city: str | None = None,
+        state: str | None = None,
+        country: str | None = None,
+        region: str | None = None,
+        players: list | None = None,
     ) -> None:
-
-        self.id = id
-        self.team_api_id = team_api_id
         self.full_name = full_name
+        self.sport = sport
+        self.id = id
         self.abbreviation = abbreviation
         self.nickname = nickname
         self.city = city
         self.state = state
         self.country = country
         self.region = region
-        self.nb_players = nb_players
-        self.players = players
-        self.sport = Sport
+        self.players: list[Player] = players or []
 
-    def __str__(self):
-        return "Id de la team : " + self.id + "/n"
-        + "API ID de la team (si existante) : " + self.team_api_id + "/n"
-        + "Nom complet de la team : " + self.full_name + "/n"
-        + "Nom abrégé : " + self.abbreviation + "/n"
-        + "Ville : " + self.city + "/n"
-        + "Etat : " + self.state + "/n"
-        + "Pays : " + self.country + "/n"
-        + "Region du monde : " + self.region + "/n"
-        + "Nombre de joueurs dans l'équipe : " + self.nb_players + "/n"
-        + "Liste des joueurs de l'équipe : " + list[self.players] + "/n"
-        + "Sport de l'équipe : " + self.sport + "/n"
+    def __str__(self) -> str:
+        return f"[{self.sport.nom}] {self.full_name}"
+
+    def __repr__(self) -> str:
+        return f"Team({self.full_name!r})"

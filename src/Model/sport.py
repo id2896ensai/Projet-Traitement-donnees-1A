@@ -20,9 +20,12 @@ class Sport:
         + ", Sport individuel ou collectif : " + texte
     
     def __repr__(self):
-        return "Sport(" + self.nom
-        + ", categorie: " + str(self.categorie)
-        + ", nb_joueurs: " + self.nb_joueurs
-        + ", description: " + str(self.description)
-        + ", sport_en_equipe: " + self.sport_en_equipe
-        + ")"
+        return f"Sport({self.nom}, en_equipe={self.sport_en_equipe})"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Sport):
+            return NotImplemented
+        return self.nom == other.nom
+
+    def __hash__(self) -> int:
+        return hash(self.nom)

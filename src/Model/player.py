@@ -1,52 +1,54 @@
-from typing import Union
-from src.Common.utils import parse_boolean
-from .person import Person
-from .team import Team
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+from src.Model.participant import Participant
+from src.Model.person import Person
+
+if TYPE_CHECKING:
+    from src.Model.sport import Sport
+    from src.Model.team import Team
 
 
-class Player(Person):
-    """def __init__(self, id: int, full_name: str, is_the_goat: Union[str, bool]):
-        self.id = id
-        self.full_name = full_name
-        self.is_the_goat = parse_boolean(is_the_goat)
+class Player(Person, Participant):
+    """An individual athlete — participant in individual-sport matches,
+    or member of a Team in collective-sport matches."""
 
-    def __repr__(self):
-        display_string = self.full_name
-        if self.is_the_goat:
-            display_string += " (GOAT)"
-        return display_string
-"""
-    def __init__(self, id, pseudo, nom, prenom, date_de_naissance, pays_de_naissance, sexe, poids, taille, role, team ):
+    def __init__(
+        self,
+        nom: str = "",
+        prenom: str = "",
+        date_de_naissance=None,
+        id=None,
+        pseudo: str | None = None,
+        pays_de_naissance: str | None = None,
+        sexe: str | None = None,
+        poids: float | None = None,
+        taille: float | None = None,
+        role: str | None = None,
+        team: Team | None = None,
+        sport: Sport | None = None,
+    ) -> None:
+        Person.__init__(self, nom=nom, prenom=prenom, date_de_naissance=date_de_naissance)
         self.id = id
         self.pseudo = pseudo
-        self.nom = nom
-        self.prenom = prenom
-        self.date_de_naissance = date_de_naissance
         self.pays_de_naissance = pays_de_naissance
         self.sexe = sexe
         self.poids = poids
         self.taille = taille
         self.role = role
         self.team = team
+        self.sport = sport
 
-    def __str__(self):
-        return "Athlete : " + self.nom + " " + self.prenom
-        + ", date de naissance : " + str(self.date_de_naissance)
-        + ", sexe : " + self.sexe
-        + ", poids : " + str(self.poids)
-        + "taille : " + str(self.taille)
-   
-    def filtre_id(self,id_recherche):
-        return id_recherche == self.id
+    @property
+    def full_name(self) -> str:
+        """Return the best available display name."""
+        if self.pseudo:
+            return self.pseudo
+        return f"{self.prenom} {self.nom}".strip()
 
-    def filtre_nom(self,nom_recherche):
-        return nom_recherche == self.nom
+    def __str__(self) -> str:
+        sport_label = self.sport.nom if self.sport else "?"
+        return f"[{sport_label}] {self.full_name}"
 
-    def filtre_prenom(self, prenom_recherche):
-        return prenom_recherche == self.prenom 
-    
-    def filtre_date_de_naissance(self, date_de_naissance):
-        return date_de_naissance == self.date_de_naissance
-    
-    def filtre_sexe(self,sexe_recherche):
-        return sexe_recherche == self.sexe
+    def __repr__(self) -> str:
+        return f"Player({self.full_name!r})"

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m __main__)",
+      "Bash(python __main__.py)"
+    ]
+  }
+}
