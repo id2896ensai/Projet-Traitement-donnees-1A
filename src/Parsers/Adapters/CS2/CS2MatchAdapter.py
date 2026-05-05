@@ -1,23 +1,32 @@
+import datetime
+
 import pandas as pd
 
 from src.Model.sports_catalogue import CS2
 
 
 class CS2MatchAdapter:
-    """Maps a counter_strike_2/match.csv row to a Match dict.
+    """Convertit une ligne de counter_strike_2/match.csv en dict Match.
 
-    Requires a pre-loaded teams dict {team_name (str): Team}.
-
-    CSV columns:
-        date         -> date_match  (format YYYY-MM-DD)
-        team_1       -> participant_1
-        team_2       -> participant_2
-        score_team_1 -> score_participant_1  (maps won)
-        score_team_2 -> score_participant_2  (maps won)
+    Requiert un dictionnaire d'equipes pre-charge {nom_equipe (str): Team}.
+    Le score correspond au nombre de cartes (maps) gagnees.
     """
 
-    def __init__(self, teams: dict) -> None:
-        self.teams = teams
+    def __init__(self, equipes: dict) -> None:
+        self.equipes = equipes
 
     def adapt(self, row: pd.Series) -> dict:
-        raise NotImplementedError
+        equipe_1 = self.equipes.get(str(row["team_1"]).strip())
+        equipe_2 = self.equipes.get(str(row["team_2"]).strip())
+
+        if equipe_1 is None or equipe_2 is None:
+            raise KeyError("Equipe introuvable dans le dictionnaire")
+
+        return {
+            "sport":               CS2,
+            "participant_1":       equipe_1,
+            "participant_2":       equipe_2,
+            "score_participant_1": int(row["score_team_1"]),
+            "score_participant_2": int(row["score_team_2"]),
+            "date_match":          datetime.date.fromisoformat(str(row["date"])),
+        }

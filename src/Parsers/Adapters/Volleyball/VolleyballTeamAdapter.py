@@ -4,15 +4,17 @@ from src.Model.sports_catalogue import VOLLEYBALL
 
 
 class VolleyballTeamAdapter:
-    """Maps a volleyball/country.csv row to a Team dict.
+    """Convertit une ligne de volleyball/country.csv en dict Team.
 
-    In volleyball (JO 2024), teams are countries.
-
-    CSV columns:
-        code         -> id + abbreviation
-        country_long -> full_name
+    En volleyball (JO 2024), les equipes sont des pays.
+    Le code pays (ex: "USA") est utilise comme cle dans le CSV des matchs.
     """
 
     @staticmethod
     def adapt(row: pd.Series) -> dict:
-        raise NotImplementedError
+        return {
+            "full_name":    str(row["country_long"]),
+            # Le code pays sert a retrouver l'equipe depuis le CSV des matchs
+            "abbreviation": str(row["code"]),
+            "sport":        VOLLEYBALL,
+        }

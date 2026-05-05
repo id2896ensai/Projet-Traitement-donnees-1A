@@ -1,28 +1,32 @@
+import datetime
+
 import pandas as pd
 
 from src.Model.sports_catalogue import TENNIS
 
 
 class TennisPlayerAdapter:
-    """Maps an ATP or WTA player CSV row to a Player dict.
+    """Convertit une ligne ATP ou WTA player CSV en dict Player.
 
-    Works for both atp_players_2024.csv and wta_players_2024.csv.
-
-    CSV columns:
-        player_id  -> id
-        name_first -> prenom
-        name_last  -> nom
-        hand       -> (ignored or stored in role)
-        dob        -> date_de_naissance  (float YYYYMMDD, can be NaN)
-        ioc        -> pays_de_naissance
-        height     -> taille  (in cm, can be NaN)
-
-    Tip:
-        import numpy as np
-        date = datetime.datetime.strptime(f"{row['dob']:.0f}", "%Y%m%d").date()
-              if not np.isnan(row["dob"]) else None
+    Fonctionne pour atp_players_2024.csv et wta_players_2024.csv.
     """
 
     @staticmethod
     def adapt(row: pd.Series) -> dict:
-        raise NotImplementedError
+        # La date de naissance est un flottant au format AAAAMMJJ (ex: 19970420.0)
+        dob = None
+        dob_val = row.get("dob")
+        if pd.notna(dob_val):
+            dob_str = str(int(float(dob_val)))
+            if len(dob_str) == 8:
+                dob = datetime.date(int(dob_str[:4]), int(dob_str[4:6]), int(dob_str[6:8]))
+
+        return {
+            "id":                int(row["player_id"]),
+            "nom":               str(row["name_last"]),
+            "prenom":            str(row["name_first"]),
+            "date_de_naissance": dob,
+            "pays_de_naissance": str(row["ioc"]) if pd.notna(row.get("ioc")) else None,
+            "taille":            str(int(float(row["height"]))) if pd.notna(row.get("height")) else None,
+            "sport":             TENNIS,
+        }

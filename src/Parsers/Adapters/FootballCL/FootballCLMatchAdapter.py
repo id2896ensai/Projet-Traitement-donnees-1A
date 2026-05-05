@@ -1,23 +1,31 @@
+import datetime
+
 import pandas as pd
 
 from src.Model.sports_catalogue import FOOTBALL_CL
 
 
 class FootballCLMatchAdapter:
-    """Maps a football_champions_league/match.csv row to a Match dict.
+    """Convertit une ligne de football_champions_league/match.csv en dict Match.
 
-    Requires a pre-loaded teams dict {short_name (str): Team}.
-
-    CSV columns:
-        date            -> date_match  (format YYYY-MM-DD)
-        team_home       -> participant_1  (short_name)
-        team_away       -> participant_2  (short_name)
-        score_team_home -> score_participant_1
-        score_team_away -> score_participant_2
+    Requiert un dictionnaire d'equipes pre-charge {short_name (str): Team}.
     """
 
-    def __init__(self, teams: dict) -> None:
-        self.teams = teams
+    def __init__(self, equipes: dict) -> None:
+        self.equipes = equipes
 
     def adapt(self, row: pd.Series) -> dict:
-        raise NotImplementedError
+        equipe_dom = self.equipes.get(str(row["team_home"]).strip())
+        equipe_ext = self.equipes.get(str(row["team_away"]).strip())
+
+        if equipe_dom is None or equipe_ext is None:
+            raise KeyError("Equipe introuvable dans le dictionnaire")
+
+        return {
+            "sport":               FOOTBALL_CL,
+            "participant_1":       equipe_dom,
+            "participant_2":       equipe_ext,
+            "score_participant_1": int(row["score_team_home"]),
+            "score_participant_2": int(row["score_team_away"]),
+            "date_match":          datetime.date.fromisoformat(str(row["date"])),
+        }

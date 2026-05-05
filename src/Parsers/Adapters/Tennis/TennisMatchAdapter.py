@@ -1,27 +1,37 @@
+import datetime
+
 import pandas as pd
 
 from src.Model.sports_catalogue import TENNIS
 
 
 class TennisMatchAdapter:
-    """Maps an ATP or WTA match CSV row to a Match dict.
+    """Convertit une ligne ATP ou WTA match CSV en dict Match.
 
-    Tennis is an INDIVIDUAL sport: matches oppose two players.
-    Requires a pre-loaded players dict {player_id (int): Player}.
-
-    CSV columns:
-        tourney_date -> date_match  (int YYYYMMDD, e.g. 20240101)
-        winner_id    -> participant with score 1
-        loser_id     -> participant with score 0
-
-    Score convention: winner=1, loser=0.
-
-    Tip:
-        date = datetime.datetime.strptime(str(int(row["tourney_date"])), "%Y%m%d").date()
+    Le tennis est un sport individuel : deux joueurs s'affrontent.
+    Requiert un dictionnaire de joueurs pre-charge {player_id (int): Player}.
+    Score : 1 pour le vainqueur, 0 pour le perdant.
     """
 
-    def __init__(self, players: dict) -> None:
-        self.players = players
+    def __init__(self, joueurs: dict) -> None:
+        self.joueurs = joueurs
 
     def adapt(self, row: pd.Series) -> dict:
-        raise NotImplementedError
+        joueur_gagnant = self.joueurs.get(int(row["winner_id"]))
+        joueur_perdant = self.joueurs.get(int(row["loser_id"]))
+
+        if joueur_gagnant is None or joueur_perdant is None:
+            raise KeyError("Joueur introuvable dans le dictionnaire")
+
+        # La date du tournoi est un entier au format AAAAMMJJ (ex: 20240101)
+        date_str = str(int(row["tourney_date"]))
+        date = datetime.date(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
+
+        return {
+            "sport":               TENNIS,
+            "participant_1":       joueur_gagnant,
+            "participant_2":       joueur_perdant,
+            "score_participant_1": 1,
+            "score_participant_2": 0,
+            "date_match":          date,
+        }

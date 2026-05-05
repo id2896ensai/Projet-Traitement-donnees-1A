@@ -7,6 +7,7 @@ class LolMatchLoader(GenericMatchLoader):
     """Wires team loading and match mapping for League of Legends."""
 
     def __init__(self, match_filepath: str, team_filepath: str) -> None:
-        teams = GenericTeamLoader(team_filepath, LolTeamAdapter()).load_as_dict("full_name")
+        # Les matchs referencent les equipes par leur abreviation (ex: "TH", "RGE")
+        teams = GenericTeamLoader(team_filepath, LolTeamAdapter()).load_as_dict("abbreviation")
         adapter = LolMatchAdapter(teams)
         super().__init__(match_filepath, adapter)

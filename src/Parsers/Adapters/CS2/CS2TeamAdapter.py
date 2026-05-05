@@ -4,15 +4,14 @@ from src.Model.sports_catalogue import CS2
 
 
 class CS2TeamAdapter:
-    """Maps a counter_strike_2/team.csv row to a Team dict.
-
-    CSV columns:
-        team              -> full_name
-        team_abbreviation -> abbreviation
-        location          -> country
-        region            -> region
-    """
+    """Convertit une ligne de counter_strike_2/team.csv en dict Team."""
 
     @staticmethod
     def adapt(row: pd.Series) -> dict:
-        raise NotImplementedError
+        return {
+            "full_name":    str(row["team"]),
+            "abbreviation": str(row["team_abbreviation"]) if pd.notna(row.get("team_abbreviation")) else None,
+            "country":      str(row["location"]) if pd.notna(row.get("location")) else None,
+            "region":       str(row["region"]) if pd.notna(row.get("region")) else None,
+            "sport":        CS2,
+        }

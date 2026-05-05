@@ -4,14 +4,13 @@ from src.Model.sports_catalogue import BADMINTON
 
 
 class BadmintonPlayerAdapter:
-    """Maps a badminton/player.csv row to a Player dict.
-
-    CSV columns:
-        name      -> prenom + nom  (format "Firstname Lastname")
-        country   -> pays_de_naissance
-        continent -> (ignored)
-    """
+    """Convertit une ligne de badminton/player.csv en dict Player."""
 
     @staticmethod
     def adapt(row: pd.Series) -> dict:
-        raise NotImplementedError
+        # On stocke le nom complet dans pseudo pour que full_name retourne le nom exact
+        return {
+            "pseudo":            str(row["name"]).strip(),
+            "pays_de_naissance": str(row["country"]) if pd.notna(row.get("country")) else None,
+            "sport":             BADMINTON,
+        }

@@ -4,14 +4,14 @@ from src.Model.sports_catalogue import FOOTBALL
 
 
 class FootballTeamAdapter:
-    """Maps a football_european_leagues/team.csv row to a Team dict.
-
-    CSV columns:
-        team_api_id    -> id
-        team_long_name -> full_name
-        team_short_name-> abbreviation
-    """
+    """Convertit une ligne de football_european_leagues/team.csv en dict Team."""
 
     @staticmethod
     def adapt(row: pd.Series) -> dict:
-        raise NotImplementedError
+        return {
+            # team_api_id est l'identifiant utilise dans le CSV des matchs
+            "id":           int(row["team_api_id"]),
+            "full_name":    str(row["team_long_name"]),
+            "abbreviation": str(row["team_short_name"]),
+            "sport":        FOOTBALL,
+        }
