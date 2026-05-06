@@ -14,7 +14,7 @@ def test_chess():
     try:
         # 1. TEAMS (une Team solo par joueur)
         team_loader = GenericTeamLoader(
-            "data/chess/player.csv",
+            "../data/chess/player.csv",
             ChessTeamAdapter()
         )
         teams = team_loader.load()
@@ -23,7 +23,7 @@ def test_chess():
 
         # 2. PLAYERS
         player_loader = GenericPlayerLoader(
-            "data/chess/player.csv",
+            "../data/chess/player.csv",
             ChessPlayerAdapter()
         )
         players = player_loader.load()
@@ -33,7 +33,7 @@ def test_chess():
         teams_dict = team_loader.load_as_dict("full_name")
 
         match_loader = GenericMatchLoader(
-            "data/chess/match.csv",
+            "../data/chess/match.csv",
             ChessMatchAdapter(equipes=teams_dict)
         )
         matches = match_loader.load()

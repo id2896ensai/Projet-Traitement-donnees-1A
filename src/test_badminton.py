@@ -14,7 +14,7 @@ def test_badminton():
     try:
         # 1. TEAMS (une Team solo par joueur)
         team_loader = GenericTeamLoader(
-            "data/badminton/player.csv",
+            "../data/badminton/player.csv",
             BadmintonTeamAdapter()
         )
         teams = team_loader.load()
@@ -23,7 +23,7 @@ def test_badminton():
 
         # 2. PLAYERS
         player_loader = GenericPlayerLoader(
-            "data/badminton/player.csv",
+            "../data/badminton/player.csv",
             BadmintonPlayerAdapter()
         )
         players = player_loader.load()
@@ -33,7 +33,7 @@ def test_badminton():
         teams_dict = team_loader.load_as_dict("full_name")
 
         match_loader = GenericMatchLoader(
-            "data/badminton/match.csv",
+            "../data/badminton/match.csv",
             BadmintonMatchAdapter(equipes=teams_dict)
         )
         matches = match_loader.load()

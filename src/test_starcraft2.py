@@ -14,7 +14,7 @@ def test_starcraft2():
     try:
         # 1. TEAMS (une Team solo par joueur)
         team_loader = GenericTeamLoader(
-            "data/starcraft_2/player.csv",
+            "../data/starcraft_2/player.csv",
             Starcraft2TeamAdapter()
         )
         teams = team_loader.load()
@@ -23,7 +23,7 @@ def test_starcraft2():
 
         # 2. PLAYERS
         player_loader = GenericPlayerLoader(
-            "data/starcraft_2/player.csv",
+            "../data/starcraft_2/player.csv",
             Starcraft2PlayerAdapter()
         )
         players = player_loader.load()
@@ -33,7 +33,7 @@ def test_starcraft2():
         teams_dict = team_loader.load_as_dict("full_name")
 
         match_loader = GenericMatchLoader(
-            "data/starcraft_2/match.csv",
+            "../data/starcraft_2/match.csv",
             Starcraft2MatchAdapter(equipes=teams_dict)
         )
         matches = match_loader.load()

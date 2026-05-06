@@ -14,7 +14,7 @@ def test_volleyball():
     try:
         # 1. TEAMS (equipes nationales)
         team_loader = GenericTeamLoader(
-            "data/volleyball/country.csv",
+            "../data/volleyball/country.csv",
             VolleyballTeamAdapter()
         )
         teams = team_loader.load()
@@ -23,7 +23,7 @@ def test_volleyball():
 
         # 2. PLAYERS
         player_loader = GenericPlayerLoader(
-            "data/volleyball/player_men.csv",
+            "../data/volleyball/player_men.csv",
             VolleyballPlayerAdapter()
         )
         players = player_loader.load()
@@ -33,7 +33,7 @@ def test_volleyball():
         teams_dict = team_loader.load_as_dict("abbreviation")
 
         match_loader = GenericMatchLoader(
-            "data/volleyball/match_men.csv",
+            "../data/volleyball/match_men.csv",
             VolleyballMatchAdapter(equipes=teams_dict)
         )
         matches = match_loader.load()

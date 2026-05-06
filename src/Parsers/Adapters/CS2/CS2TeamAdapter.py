@@ -1,5 +1,5 @@
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 CS2 = Sport("Counter-Strike 2", "esport", 10, "FPS tactique 5v5", True)
 

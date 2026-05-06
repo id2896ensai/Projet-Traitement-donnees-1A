@@ -14,7 +14,7 @@ def test_lol():
     try:
         # 1. TEAMS
         team_loader = GenericTeamLoader(
-            "data/league_of_legends/team.csv",
+            "../data/league_of_legends/team.csv",
             LolTeamAdapter()
         )
         teams = team_loader.load()
@@ -23,7 +23,7 @@ def test_lol():
 
         # 2. PLAYERS
         player_loader = GenericPlayerLoader(
-            "data/league_of_legends/player.csv",
+            "../data/league_of_legends/player.csv",
             LolPlayerAdapter()
         )
         players = player_loader.load()
@@ -33,7 +33,7 @@ def test_lol():
         teams_dict = team_loader.load_as_dict("abbreviation")
 
         match_loader = GenericMatchLoader(
-            "data/league_of_legends/match.csv",
+            "../data/league_of_legends/match.csv",
             LolMatchAdapter(equipes=teams_dict)
         )
         matches = match_loader.load()

@@ -1,6 +1,6 @@
 import datetime
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 CHESS = Sport("Chess", "strategie", 2, "Jeu d'echecs", False)
 

@@ -17,7 +17,7 @@ def test_basketball():
         # 1. TEAMS
         # -------------------------
         team_loader = GenericTeamLoader(
-            "data/basketball/team.csv",
+            "../data/basketball/team.csv",
             BasketballTeamAdapter()
         )
         teams = team_loader.load()
@@ -28,7 +28,7 @@ def test_basketball():
         # 2. PLAYERS
         # -------------------------
         player_loader = GenericPlayerLoader(
-            "data/basketball/player.csv",
+            "../data/basketball/player.csv",
             BasketballPlayerAdapter()
         )
         players = player_loader.load()
@@ -40,7 +40,7 @@ def test_basketball():
         teams_dict = team_loader.load_as_dict("id")
 
         match_loader = GenericMatchLoader(
-            "data/basketball/game.csv",
+            "../data/basketball/game.csv",
             BasketballMatchAdapter(teams=teams_dict)
         )
         matches = match_loader.load()

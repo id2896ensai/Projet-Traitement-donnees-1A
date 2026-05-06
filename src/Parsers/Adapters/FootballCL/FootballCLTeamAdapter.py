@@ -1,5 +1,5 @@
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 FOOTBALL_CL = Sport("Football Champions League", "ballon", 22, "Ligue des Champions UEFA", True)
 

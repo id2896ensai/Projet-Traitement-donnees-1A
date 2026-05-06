@@ -14,7 +14,7 @@ def test_tennis():
     try:
         # 1. TEAMS (une Team solo par joueur)
         team_loader = GenericTeamLoader(
-            "data/tennis/atp_players_2024.csv",
+            "../data/tennis/atp_players_2024.csv",
             TennisTeamAdapter()
         )
         teams = team_loader.load()
@@ -23,7 +23,7 @@ def test_tennis():
 
         # 2. PLAYERS
         player_loader = GenericPlayerLoader(
-            "data/tennis/atp_players_2024.csv",
+            "../data/tennis/atp_players_2024.csv",
             TennisPlayerAdapter()
         )
         players = player_loader.load()
@@ -33,7 +33,7 @@ def test_tennis():
         teams_dict = team_loader.load_as_dict("id")
 
         match_loader = GenericMatchLoader(
-            "data/tennis/atp_matches_2024.csv",
+            "../data/tennis/atp_matches_2024.csv",
             TennisMatchAdapter(equipes=teams_dict)
         )
         matches = match_loader.load()
