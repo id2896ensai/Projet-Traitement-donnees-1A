@@ -3,9 +3,9 @@ from Parsers.Loaders.genericloaders import (
     GenericPlayerLoader,
     GenericMatchLoader
 )
-from Parsers.Adapters.LOL.LolTeamAdapter import LolTeamAdapter
-from Parsers.Adapters.LOL.LolPlayerAdapter import LolPlayerAdapter
-from Parsers.Adapters.LOL.LolMatchAdapter import LolMatchAdapter
+from Parsers.Adapters.Lol.LolTeamAdapter import LolTeamAdapter
+from Parsers.Adapters.Lol.LolPlayerAdapter import LolPlayerAdapter
+from Parsers.Adapters.Lol.LolMatchAdapter import LolMatchAdapter
 
 
 def test_lol():

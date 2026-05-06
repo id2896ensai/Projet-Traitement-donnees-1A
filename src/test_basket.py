@@ -21,22 +21,18 @@ def test_basketball():
             BasketballTeamAdapter()
         )
         teams = team_loader.load()
-        print(f"✔ {len(teams)} teams chargées")
+        print(f"OK {len(teams)} teams chargees")
         print("Exemple:", teams[0].__dict__)
 
-        # -------------------------
         # 2. PLAYERS
-        # -------------------------
         player_loader = GenericPlayerLoader(
             "../data/basketball/player.csv",
             BasketballPlayerAdapter()
         )
         players = player_loader.load()
-        print(f"✔ {len(players)} players chargés")
+        print(f"OK {len(players)} players charges")
 
-        # -------------------------
         # 3. MATCHES
-        # -------------------------
         teams_dict = team_loader.load_as_dict("id")
 
         match_loader = GenericMatchLoader(
@@ -44,13 +40,14 @@ def test_basketball():
             BasketballMatchAdapter(teams=teams_dict)
         )
         matches = match_loader.load()
-        print(f"✔ {len(matches)} games chargés")
+        print(f"OK {len(matches)} games charges")
 
-        # -------------------------
-        print("\n✅ TEST RÉUSSI")
+        print("\nTEST REUSSI")
 
     except Exception as e:
-        print("\n❌ ERREUR :", e)
+        print("\nERREUR :", e)
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == "__main__":

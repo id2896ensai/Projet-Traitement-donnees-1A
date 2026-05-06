@@ -11,7 +11,7 @@ class FootballMatchAdapter:
 
     Colonnes CSV : date, home_team_api_id, away_team_api_id, home_team_goal, away_team_goal
 
-    Requiert un dict d'équipes pré-chargé {team_api_id (int): Team}.
+    Requiert un dict d'equipes pre-charge {team_api_id (int): Team}.
     La date est au format "2008-08-17 00:00:00" — on ne garde que la partie date.
     """
 
@@ -28,10 +28,8 @@ class FootballMatchAdapter:
         date_str = str(row["date"]).split(" ")[0]
 
         return {
-            "sport":               FOOTBALL,
-            "participant_1":       equipe_dom,
-            "participant_2":       equipe_ext,
-            "score_participant_1": int(row["home_team_goal"]),
-            "score_participant_2": int(row["away_team_goal"]),
-            "date_match":          datetime.date.fromisoformat(date_str),
+            "sport":        FOOTBALL,
+            "participants": [equipe_dom, equipe_ext],
+            "scores":       {equipe_dom: int(row["home_team_goal"]), equipe_ext: int(row["away_team_goal"])},
+            "date_match":   datetime.date.fromisoformat(date_str),
         }

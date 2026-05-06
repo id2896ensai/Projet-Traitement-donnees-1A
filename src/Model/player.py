@@ -62,7 +62,7 @@ class Player(Person):
         return (
             "Athlete : " + self.nom + " " + self.prenom
             + ", date de naissance : " + str(self.date_de_naissance)
-            + ", sexe : " + self.sexe
+            + ", sexe : " + str(self.sexe)
             + ", poids : " + str(self.poids)
             + ", taille : " + str(self.taille)
         )
@@ -84,7 +84,7 @@ class Player(Person):
             + ", prenom: " + self.prenom
             + ", date_de_naissance: " + str(self.date_de_naissance)
             + ", pays_de_naissance: " + str(self.pays_de_naissance)
-            + ", sexe: " + self.sexe
+            + ", sexe: " + str(self.sexe)
             + ", poids: " + str(self.poids)
             + ", taille: " + str(self.taille)
             + ", role: " + str(self.role)

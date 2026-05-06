@@ -23,12 +23,12 @@ class BaseLoader(ABC):
         objects = []
 
         for _, row in df.iterrows():
-
-            normalized_data = self.adapter.adapt(row)
-
-            obj = self.create_object(normalized_data)
-
-            objects.append(obj)
+            try:
+                normalized_data = self.adapter.adapt(row)
+                obj = self.create_object(normalized_data)
+                objects.append(obj)
+            except (ValueError, KeyError, TypeError):
+                pass
 
         return objects
 
