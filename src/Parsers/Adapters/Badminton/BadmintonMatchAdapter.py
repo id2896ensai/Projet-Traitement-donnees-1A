@@ -1,12 +1,13 @@
 import datetime
-
 import pandas as pd
+from src.Model.sport import Sport
+from src.Model.team import Team
 
-from src.Model.sports_catalogue import BADMINTON
+BADMINTON = Sport("Badminton", "raquette", 2, "Sport de raquette individuel", False)
 
 
 def _jeux_gagnes(score_jeu) -> tuple:
-    """Retourne (jeux_gagnes_j1, jeux_gagnes_j2) pour un jeu au format 'X-Y'."""
+    """Retourne (jeux_gagnés_j1, jeux_gagnés_j2) pour un score au format 'X-Y'."""
     if pd.isna(score_jeu) or str(score_jeu).strip() == "":
         return 0, 0
     parties = str(score_jeu).strip().split("-")
@@ -24,15 +25,36 @@ def _jeux_gagnes(score_jeu) -> tuple:
 
 
 class BadmintonMatchAdapter:
-    """Convertit une ligne de badminton/match.csv en dict Match.
-
-    Le badminton est un sport individuel.
-    Requiert un dictionnaire de joueurs pre-charge {nom (str): Player}.
-    Le score final correspond au nombre de jeux gagnes (ex: 2-1 ou 2-0).
     """
+    Convertit une ligne de badminton/match.csv en dict Match.
+
+    Pourquoi wrapper le Player dans une Team ?
+    ------------------------------------------
+    Match.__init__ vérifie que chaque participant possède un attribut `sport`
+    ET que ce sport correspond à celui du match. Team a cet attribut, mais
+    Player aussi (grâce au champ sport qu'on lui ajoute).
+    On wrappe le joueur dans une Team d'un seul joueur pour rester cohérent
+    avec les sports d'équipe : un "participant" est toujours une Team.
+
+    Requiert un dict de joueurs pré-chargé {pseudo (str): Player}.
+    Score = nombre de jeux gagnés sur les 3 manches possibles.
+    """
+
+    _counter = 0
 
     def __init__(self, joueurs: dict) -> None:
         self.joueurs = joueurs
+
+    def _solo_team(self, joueur) -> Team:
+        """Crée une Team composée d'un seul joueur (sport individuel)."""
+        BadmintonMatchAdapter._counter += 1
+        return Team(
+            id=BadmintonMatchAdapter._counter,
+            sport=BADMINTON,
+            players=[joueur],
+            full_name=joueur.pseudo or f"{joueur.prenom} {joueur.nom}",
+            abbreviation=(joueur.pseudo or joueur.nom)[:10],
+        )
 
     def adapt(self, row: pd.Series) -> dict:
         nom_j1 = str(row["player_1"]).strip()
@@ -42,9 +64,8 @@ class BadmintonMatchAdapter:
         joueur_2 = self.joueurs.get(nom_j2)
 
         if joueur_1 is None or joueur_2 is None:
-            raise KeyError("Joueur introuvable dans le dictionnaire")
+            raise KeyError(f"Joueur introuvable : '{nom_j1}' ou '{nom_j2}'")
 
-        # Comptage des jeux gagnes sur les 3 manches possibles
         score_1, score_2 = 0, 0
         for col in ["game_1_score", "game_2_score", "game_3_score"]:
             v1, v2 = _jeux_gagnes(row.get(col))
@@ -53,8 +74,8 @@ class BadmintonMatchAdapter:
 
         return {
             "sport":               BADMINTON,
-            "participant_1":       joueur_1,
-            "participant_2":       joueur_2,
+            "participant_1":       self._solo_team(joueur_1),
+            "participant_2":       self._solo_team(joueur_2),
             "score_participant_1": score_1,
             "score_participant_2": score_2,
             "date_match":          datetime.date.fromisoformat(str(row["date"])),

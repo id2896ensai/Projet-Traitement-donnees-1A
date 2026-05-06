@@ -2,16 +2,18 @@ import datetime
 import pandas as pd
 from src.Model.sport import Sport
 
-CS2 = Sport("Counter-Strike 2", "esport", 10, "FPS tactique 5v5", True)
+LOL = Sport("League of Legends", "esport", 10, "MOBA 5v5", True)
 
 _DATE_INCONNUE = datetime.date(1900, 1, 1)
 
 
-class CS2PlayerAdapter:
+class LolPlayerAdapter:
     """
-    Convertit une ligne de counter_strike_2/player.csv en dict Player.
+    Convertit une ligne de league_of_legends/player.csv en dict Player.
 
-    Colonnes CSV : pseudo, name, birthdate, nationality, role
+    Colonnes CSV : pseudo, name, country_of_birth, birthdate, role, team
+
+    Le vrai nom est séparé sur le premier espace : "Carl Ulsted Carlsen" → prenom="Carl", nom="Ulsted Carlsen".
     """
 
     @staticmethod
@@ -32,11 +34,11 @@ class CS2PlayerAdapter:
             "prenom":            prenom,
             "date_de_naissance": dob,
             "pseudo":            str(row["pseudo"]),
-            "pays_de_naissance": str(row["nationality"]) if pd.notna(row.get("nationality")) else None,
+            "pays_de_naissance": str(row["country_of_birth"]) if pd.notna(row.get("country_of_birth")) else None,
             "sexe":              None,
             "poids":             0.0,
             "taille":            0.0,
             "role":              str(row["role"]) if pd.notna(row.get("role")) else None,
             "team":              None,
-            "sport":             CS2,
+            "sport":             LOL,
         }

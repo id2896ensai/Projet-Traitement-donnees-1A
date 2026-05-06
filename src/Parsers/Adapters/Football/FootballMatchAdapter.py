@@ -1,14 +1,18 @@
 import datetime
-
 import pandas as pd
+from src.Model.sport import Sport
 
-from src.Model.sports_catalogue import FOOTBALL
+FOOTBALL = Sport("Football", "ballon", 22, "Sport collectif avec but", True)
 
 
 class FootballMatchAdapter:
-    """Convertit une ligne de football_european_leagues/match.csv en dict Match.
+    """
+    Convertit une ligne de football_european_leagues/match.csv en dict Match.
 
-    Requiert un dictionnaire d'equipes pre-charge {team_api_id (int): Team}.
+    Colonnes CSV : date, home_team_api_id, away_team_api_id, home_team_goal, away_team_goal
+
+    Requiert un dict d'équipes pré-chargé {team_api_id (int): Team}.
+    La date est au format "2008-08-17 00:00:00" — on ne garde que la partie date.
     """
 
     def __init__(self, equipes: dict) -> None:
@@ -21,7 +25,6 @@ class FootballMatchAdapter:
         if equipe_dom is None or equipe_ext is None:
             raise KeyError("Equipe introuvable dans le dictionnaire")
 
-        # La date est au format "2008-08-17 00:00:00" — on garde la partie date uniquement
         date_str = str(row["date"]).split(" ")[0]
 
         return {

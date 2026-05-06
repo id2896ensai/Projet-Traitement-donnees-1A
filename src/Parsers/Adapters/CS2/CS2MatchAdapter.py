@@ -1,15 +1,18 @@
 import datetime
-
 import pandas as pd
+from src.Model.sport import Sport
 
-from src.Model.sports_catalogue import CS2
+CS2 = Sport("Counter-Strike 2", "esport", 10, "FPS tactique 5v5", True)
 
 
 class CS2MatchAdapter:
-    """Convertit une ligne de counter_strike_2/match.csv en dict Match.
+    """
+    Convertit une ligne de counter_strike_2/match.csv en dict Match.
 
-    Requiert un dictionnaire d'equipes pre-charge {nom_equipe (str): Team}.
-    Le score correspond au nombre de cartes (maps) gagnees.
+    Colonnes CSV : date, team_1, team_2, score_team_1, score_team_2
+
+    Requiert un dict d'équipes pré-chargé {full_name (str): Team}.
+    Score = nombre de maps gagnées.
     """
 
     def __init__(self, equipes: dict) -> None:

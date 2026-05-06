@@ -1,51 +1,40 @@
 from abc import ABC, abstractmethod
 
-from src.Parsers.readers.csv_reader import read_csv
-
 
 class BaseLoader(ABC):
-    """Abstract base for all sport loaders.
-
-    Subclasses only implement create_object(data).
-    The CSV reading loop and adapter call are handled here.
-
-    Args:
-        filepath: Path to the CSV file.
-        adapter:  Object with an adapt(row) method that returns a dict.
-        sep:      CSV separator (default ",").
+    """
+    Classe abstraite de base pour tous les loaders.
     """
 
-    def __init__(self, filepath: str, adapter, sep: str = ",") -> None:
+    def __init__(self, filepath, adapter):
+
         self.filepath = filepath
         self.adapter = adapter
-        self.sep = sep
 
-    def load(self) -> list:
-        """Read the CSV and return a list of model objects.
+    def load(self):
 
-        Rows that fail adapt() or create_object() are silently skipped.
+        # sep=None + engine="python" laisse pandas détecter automatiquement
+        import pandas as pd
+        try:
+            df = pd.read_csv(self.filepath, sep=None, engine="python")
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Fichier introuvable : {self.filepath}")
 
-        Returns:
-            list: Model objects built from the CSV rows.
-        """
-        df = read_csv(self.filepath, sep=self.sep)
         objects = []
+
         for _, row in df.iterrows():
-            try:
-                data = self.adapter.adapt(row)
-                obj = self.create_object(data)
-                objects.append(obj)
-            except (ValueError, KeyError, TypeError):
-                continue
+
+            normalized_data = self.adapter.adapt(row)
+
+            obj = self.create_object(normalized_data)
+
+            objects.append(obj)
+
         return objects
 
     @abstractmethod
     def create_object(self, data: dict):
-        """Instantiate a model object from the normalised dict.
-
-        Args:
-            data: Dict produced by adapter.adapt(row).
-
-        Returns:
-            A model object (Player, Team, Match, …).
         """
+        Crée un objet métier à partir des données normalisées.
+        """
+        pass

@@ -1,14 +1,17 @@
 import datetime
-
 import pandas as pd
+from src.Model.sport import Sport
 
-from src.Model.sports_catalogue import FOOTBALL_CL
+FOOTBALL_CL = Sport("Football Champions League", "ballon", 22, "Ligue des Champions UEFA", True)
 
 
 class FootballCLMatchAdapter:
-    """Convertit une ligne de football_champions_league/match.csv en dict Match.
+    """
+    Convertit une ligne de football_champions_league/match.csv en dict Match.
 
-    Requiert un dictionnaire d'equipes pre-charge {short_name (str): Team}.
+    Colonnes CSV : date, team_home, team_away, score_team_home, score_team_away
+
+    Requiert un dict d'équipes pré-chargé {full_name/short_name (str): Team}.
     """
 
     def __init__(self, equipes: dict) -> None:
