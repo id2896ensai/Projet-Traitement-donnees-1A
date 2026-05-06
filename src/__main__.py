@@ -1,4 +1,5 @@
-# Interface en ligne de commande pour l'application de statistiques sportives.
+# Point d'entrée de l'application : python -m src  (depuis la racine)
+# ou python __main__.py  (depuis src/)
 import datetime
 
 from Parsers.Loaders.genericloaders import (
@@ -18,11 +19,16 @@ from Analysis.stats import (
 SEP = "-" * 52
 
 
+def _pause():
+    """Attend une touche avant de réafficher le menu."""
+    input("\nAppuyer sur Entree pour continuer...")
+
+
 def charger_donnees(sport_nom: str):
     """Charge et retourne (teams, players, matches) pour le sport sélectionné."""
     cfg = SPORTS_REGISTRY[sport_nom]
 
-    print(f"  Chargement des equipes...")
+    print("  Chargement des equipes...")
     team_loader = GenericTeamLoader(cfg["team_csv"], cfg["TeamAdapter"]())
     teams = team_loader.load()
 
@@ -66,6 +72,7 @@ def menu_matchs(matches: list):
 
     if not filtres:
         print("Aucun match trouve pour cette periode.")
+        _pause()
         return
 
     # Limite l'affichage à 50 lignes pour rester lisible
@@ -79,6 +86,8 @@ def menu_matchs(matches: list):
     if len(filtres) > 50:
         print(f"\n  ... et {len(filtres) - 50} autres matchs non affiches.")
 
+    _pause()
+
 
 def menu_podium(matches: list, sport_nom: str):
     """Affiche le podium (top 3) par nombre de victoires."""
@@ -89,11 +98,14 @@ def menu_podium(matches: list, sport_nom: str):
 
     if not classement:
         print("Pas assez de donnees pour etablir un podium.")
+        _pause()
         return
 
     medailles = ["1er", "2eme", "3eme"]
     for i, (equipe, nb) in enumerate(classement):
         print(f"  {medailles[i]} : {equipe.full_name}  ({nb} victoire(s))")
+
+    _pause()
 
 
 def menu_matchs_joueur(matches: list):
@@ -104,12 +116,14 @@ def menu_matchs_joueur(matches: list):
 
     if not nom or not prenom:
         print("Nom et prenom requis.")
+        _pause()
         return
 
     trouves = matchs_joueur(matches, nom, prenom)
 
     if not trouves:
         print(f"\nAucun match trouve pour {prenom} {nom}.")
+        _pause()
         return
 
     trouves.sort(key=lambda m: m.date_match)
@@ -119,6 +133,8 @@ def menu_matchs_joueur(matches: list):
         s1, s2 = m.scores[p1], m.scores[p2]
         print(f"  [{m.date_match}]  {p1.full_name}  {s1} - {s2}  {p2.full_name}")
 
+    _pause()
+
 
 def menu_victoires_equipe(matches: list):
     """Affiche le nombre de victoires d'une équipe saisie par l'utilisateur."""
@@ -126,35 +142,37 @@ def menu_victoires_equipe(matches: list):
     nom = input("  Nom de l'equipe : ").strip()
     if not nom:
         print("Nom requis.")
+        _pause()
         return
 
     nb_v = victoires_equipe(matches, nom)
-    # Compte le total de matchs joués par cette équipe
     nb_total = len(matchs_equipe(matches, nom))
 
     if nb_total == 0:
         print(f"\nEquipe '{nom}' introuvable dans les matchs.")
     else:
-        nb_d = nb_total - nb_v
-        # Calcul des nuls : matchs où l'équipe ne gagne pas mais ce n'est pas une défaite nette
         print(f"\n  {nom}")
         print(f"    Matchs joues : {nb_total}")
         print(f"    Victoires    : {nb_v}")
         print(f"    Autres       : {nb_total - nb_v}")
 
+    _pause()
+
 
 def menu_stats_descriptives(matches: list):
-    """Statistiques descriptives (buts/pts marqués et encaissés) pour une équipe."""
+    """Statistiques descriptives (pts marqués/encaissés) pour une équipe."""
     print(SEP)
     nom = input("  Nom de l'equipe : ").strip()
     if not nom:
         print("Nom requis.")
+        _pause()
         return
 
     stats = stats_descriptives(matches, nom)
 
     if "erreur" in stats:
         print("\n" + stats["erreur"])
+        _pause()
         return
 
     print(f"\n  Stats pour '{nom}' :\n")
@@ -167,6 +185,8 @@ def menu_stats_descriptives(matches: list):
     print(f"    Moy. pts encaisses   : {stats['moy_pts_encaisses']}")
     print(f"    Meilleur score       : {stats['max_score']}")
     print(f"    Pire score           : {stats['min_score']}")
+
+    _pause()
 
 
 # ---------- menu principal d'un sport ----------
