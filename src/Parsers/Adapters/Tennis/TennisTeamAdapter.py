@@ -1,7 +1,7 @@
 import datetime
 import pandas as pd
-from src.Model.sport import Sport
-from src.Model.player import Player
+from Model.player import Player
+from Model.sport import Sport
 
 TENNIS = Sport("Tennis", "raquette", 1, "Sport de raquette individuel", False)
 
@@ -19,11 +19,11 @@ def _parse_dob(val) -> datetime.date:
 
 class TennisTeamAdapter:
     """
-    Cree une Team d'un seul joueur depuis tennis/atp_players_2024.csv (sport individuel).
+    Convertit une ligne de tennis/atp_players_2024.csv en dict Team (sport individuel).
 
     Colonnes CSV : player_id, name_first, name_last, hand, dob, ioc, height
 
-    L'equipe est indexee par player_id pour etre retrouvee
+    L'equipe est indexee par id (= player_id) pour etre retrouvee
     depuis les colonnes winner_id / loser_id du CSV de matchs.
     """
 

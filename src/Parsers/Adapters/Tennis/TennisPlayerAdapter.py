@@ -1,6 +1,6 @@
 import datetime
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 TENNIS = Sport("Tennis", "raquette", 1, "Sport de raquette individuel", False)
 
@@ -37,5 +37,4 @@ class TennisPlayerAdapter:
             "taille":            float(row["height"]) if pd.notna(row.get("height")) else 0.0,
             "role":              None,
             "team":              None,
-            "sport":             TENNIS,
         }

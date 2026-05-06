@@ -1,7 +1,7 @@
 import datetime
 import pandas as pd
-from src.Model.sport import Sport
-from src.Model.player import Player
+from Model.player import Player
+from Model.sport import Sport
 
 STARCRAFT2 = Sport("Starcraft2", "strategie", 1, "Jeu de strategie en temps reel individuel", False)
 
@@ -10,7 +10,7 @@ _DATE_INCONNUE = datetime.date(1900, 1, 1)
 
 class Starcraft2TeamAdapter:
     """
-    Cree une Team d'un seul joueur depuis starcraft_2/player.csv (sport individuel).
+    Convertit une ligne de starcraft_2/player.csv en dict Team (sport individuel).
 
     Colonnes CSV : pseudo, name, nationality, birthdate, race, team
 
@@ -18,13 +18,16 @@ class Starcraft2TeamAdapter:
     depuis les colonnes player_1 / player_2 du CSV de matchs.
     """
 
+    _counter = 0
+
     @staticmethod
     def adapt(row: pd.Series) -> dict:
+        Starcraft2TeamAdapter._counter += 1
         pseudo = str(row["pseudo"]).strip()
         nom_complet = str(row["name"]).strip() if pd.notna(row.get("name")) else ""
         parties = nom_complet.split(" ", 1)
         prenom = parties[0] if parties[0] else pseudo
-        nom = parties[1] if len(parties) == 2 else "Inconnu"
+        nom = parties[1] if len(parties) == 2 else "X"
 
         try:
             dob = datetime.date.fromisoformat(str(row["birthdate"]))
@@ -32,7 +35,7 @@ class Starcraft2TeamAdapter:
             dob = _DATE_INCONNUE
 
         joueur = Player(
-            id=abs(hash(pseudo)) % (10 ** 7),
+            id=Starcraft2TeamAdapter._counter,
             nom=nom,
             prenom=prenom,
             date_de_naissance=dob,
@@ -47,9 +50,10 @@ class Starcraft2TeamAdapter:
         )
 
         return {
-            "id":           abs(hash(pseudo)) % (10 ** 7),
+            "id":           Starcraft2TeamAdapter._counter,
             "sport":        STARCRAFT2,
             "players":      [joueur],
             "full_name":    pseudo,
             "abbreviation": pseudo[:10],
+            "country":      str(row["nationality"]) if pd.notna(row.get("nationality")) else None,
         }

@@ -1,42 +1,40 @@
 import datetime
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
-LOL = Sport("LeagueOfLegends", "esport", 5, "Jeu de strategie en equipe 5v5", True)
+LOL = Sport("League of Legends", "esport", 10, "MOBA 5v5", True)
 
 
 class LolMatchAdapter:
     """
     Convertit une ligne de league_of_legends/match.csv en dict Match.
 
-    Colonnes CSV : date, team_blue, team_red, winner, ...
+    Colonnes CSV : date, team_blue, team_red, winner (abreviation de l'equipe gagnante)
 
     Requiert un dict d'equipes pre-charge {abbreviation (str): Team}.
-    Score : equipe gagnante = 1, perdante = 0.
+    Score : 1 pour le vainqueur, 0 pour le perdant.
     """
 
-    def __init__(self, teams: dict) -> None:
-        self.teams = teams
+    def __init__(self, equipes: dict) -> None:
+        self.equipes = equipes
 
     def adapt(self, row: pd.Series) -> dict:
-        abbrev_blue = str(row["team_blue"]).strip()
-        abbrev_red = str(row["team_red"]).strip()
+        abrv_bleu = str(row["team_blue"]).strip()
+        abrv_rouge = str(row["team_red"]).strip()
 
-        team_blue = self.teams.get(abbrev_blue)
-        team_red = self.teams.get(abbrev_red)
+        equipe_bleu = self.equipes.get(abrv_bleu)
+        equipe_rouge = self.equipes.get(abrv_rouge)
 
-        if team_blue is None or team_red is None:
-            raise KeyError(f"Equipe introuvable : '{abbrev_blue}' ou '{abbrev_red}'")
+        if equipe_bleu is None or equipe_rouge is None:
+            raise KeyError(f"Equipe introuvable : '{abrv_bleu}' ou '{abrv_rouge}'")
 
-        winner = str(row["winner"]).strip()
-        score_blue = 1 if winner == abbrev_blue else 0
-        score_red = 1 if winner == abbrev_red else 0
+        vainqueur = str(row["winner"]).strip()
+        score_bleu = 1 if vainqueur == abrv_bleu else 0
+        score_rouge = 1 if vainqueur == abrv_rouge else 0
 
         return {
-            "sport":               LOL,
-            "participant_1":       team_blue,
-            "participant_2":       team_red,
-            "score_participant_1": score_blue,
-            "score_participant_2": score_red,
-            "date_match":          datetime.date.fromisoformat(str(row["date"])),
+            "sport":        LOL,
+            "participants": [equipe_bleu, equipe_rouge],
+            "scores":       {equipe_bleu: score_bleu, equipe_rouge: score_rouge},
+            "date_match":   datetime.date.fromisoformat(str(row["date"])),
         }

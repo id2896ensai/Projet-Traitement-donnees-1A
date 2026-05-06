@@ -1,4 +1,3 @@
-from datetime import date as DateType
 from .person import Person
 from .sport import Sport
 
@@ -24,8 +23,8 @@ class Player(Person):
         if not prenom.strip():
             raise ValueError("prenom ne peut pas être vide")
 
-        if not isinstance(date_de_naissance, DateType):
-            raise TypeError("date_de_naissance doit être un objet date")
+        #if date_de_naissance is not None and not isinstance(date_de_naissance, (str, type(None))):
+            #raise TypeError("date_de_naissance doit être une str ou None")
 
         if pays_de_naissance is not None and not isinstance(pays_de_naissance, str):
             raise TypeError("pays_de_naissance doit être une str ou None")
@@ -41,6 +40,9 @@ class Player(Person):
 
         if role is not None and not isinstance(role, str):
             raise TypeError("role doit être une str ou None")
+
+        if team is not None and not isinstance(team, object):
+            raise TypeError("team doit être une instance valide ou None")
 
         if sport is not None and not isinstance(sport, Sport):
             raise TypeError("sport doit être une instance de Sport ou None")

@@ -1,5 +1,5 @@
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 VOLLEYBALL = Sport("Volleyball", "ballon", 6, "Sport collectif avec filet", True)
 
@@ -14,11 +14,14 @@ class VolleyballTeamAdapter:
     pour etre retrouvee depuis les colonnes country_code_1/2 du CSV de matchs.
     """
 
+    _counter = 0
+
     @staticmethod
     def adapt(row: pd.Series) -> dict:
+        VolleyballTeamAdapter._counter += 1
         code = str(row["code"]).strip()
         return {
-            "id":           abs(hash(code)) % (10 ** 7),
+            "id":           VolleyballTeamAdapter._counter,
             "sport":        VOLLEYBALL,
             "players":      [],
             "full_name":    str(row["country_long"]),

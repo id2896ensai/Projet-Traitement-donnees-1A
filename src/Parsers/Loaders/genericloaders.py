@@ -1,7 +1,7 @@
-from src.Parsers.baseloader import BaseLoader
-from src.Model.team import Team
-from src.Model.player import Player
-from src.Model.match import Match
+from ..baseloader import BaseLoader
+from Model.team import Team
+from Model.player import Player
+from Model.match import Match
 
 
 class GenericTeamLoader(BaseLoader):
@@ -91,13 +91,4 @@ class GenericMatchLoader(BaseLoader):
     """
 
     def create_object(self, data: dict) -> Match:
-        # Convertit le format plat (participant_1/2 + score_participant_1/2)
-        # vers le format attendu par Match (participants + scores)
-        if "participant_1" in data:
-            p1 = data.pop("participant_1")
-            p2 = data.pop("participant_2")
-            s1 = data.pop("score_participant_1")
-            s2 = data.pop("score_participant_2")
-            data["participants"] = [p1, p2]
-            data["scores"] = {p1: s1, p2: s2}
         return Match(**data)

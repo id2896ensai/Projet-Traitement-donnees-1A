@@ -1,6 +1,6 @@
 import datetime
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 STARCRAFT2 = Sport("Starcraft2", "strategie", 1, "Jeu de strategie en temps reel individuel", False)
 
@@ -12,8 +12,6 @@ class Starcraft2PlayerAdapter:
     Convertit une ligne de starcraft_2/player.csv en dict Player.
 
     Colonnes CSV : pseudo, name, nationality, birthdate, race, team
-
-    Le pseudo est utilise comme identifiant de lookup dans les matchs.
     """
 
     @staticmethod
@@ -22,7 +20,7 @@ class Starcraft2PlayerAdapter:
         nom_complet = str(row["name"]).strip() if pd.notna(row.get("name")) else ""
         parties = nom_complet.split(" ", 1)
         prenom = parties[0] if parties[0] else pseudo
-        nom = parties[1] if len(parties) == 2 else "Inconnu"
+        nom = parties[1] if len(parties) == 2 else "X"
 
         try:
             dob = datetime.date.fromisoformat(str(row["birthdate"]))
@@ -41,5 +39,4 @@ class Starcraft2PlayerAdapter:
             "taille":            0.0,
             "role":              str(row["race"]) if pd.notna(row.get("race")) else None,
             "team":              None,
-            "sport":             STARCRAFT2,
         }

@@ -1,6 +1,6 @@
 import datetime
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 BASKETBALL = Sport("Basketball", "ballon", 10, "Sport collectif avec panier", True)
 
@@ -48,6 +48,5 @@ class BasketballPlayerAdapter:
             "poids":             float(row["weight"]) if pd.notna(row.get("weight")) else 0.0,
             "taille":            float(row["height"].split("-")[0]) * 30.48 if pd.notna(row.get("height")) else 0.0,
             "role":              str(row["position"]) if pd.notna(row.get("position")) else None,
-            "team":              None,
-            "sport":             BASKETBALL,
+            "team":              None
         }

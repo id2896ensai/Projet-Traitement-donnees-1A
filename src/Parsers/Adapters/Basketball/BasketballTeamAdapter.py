@@ -1,5 +1,5 @@
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 
 BASKETBALL = Sport("Basketball", "ballon", 10, "Sport collectif avec panier", True)

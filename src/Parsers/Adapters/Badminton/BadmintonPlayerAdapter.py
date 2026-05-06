@@ -1,6 +1,6 @@
 import datetime
 import pandas as pd
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 BADMINTON = Sport("Badminton", "raquette", 2, "Sport de raquette individuel", False)
 
@@ -37,6 +37,5 @@ class BadmintonPlayerAdapter:
             "poids":             0.0,
             "taille":            0.0,
             "role":              None,
-            "team":              None,
-            "sport":             BADMINTON,
+            "team":              None
         }
