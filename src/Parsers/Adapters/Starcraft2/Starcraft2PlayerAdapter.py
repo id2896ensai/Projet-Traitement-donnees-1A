@@ -2,16 +2,18 @@ import datetime
 import pandas as pd
 from src.Model.sport import Sport
 
-LOL = Sport("LeagueOfLegends", "esport", 5, "Jeu de strategie en equipe 5v5", True)
+STARCRAFT2 = Sport("Starcraft2", "strategie", 1, "Jeu de strategie en temps reel individuel", False)
 
 _DATE_INCONNUE = datetime.date(1900, 1, 1)
 
 
-class LolPlayerAdapter:
+class Starcraft2PlayerAdapter:
     """
-    Convertit une ligne de league_of_legends/player.csv en dict Player.
+    Convertit une ligne de starcraft_2/player.csv en dict Player.
 
-    Colonnes CSV : pseudo, name, country_of_birth, birthdate, role, team
+    Colonnes CSV : pseudo, name, nationality, birthdate, race, team
+
+    Le pseudo est utilise comme identifiant de lookup dans les matchs.
     """
 
     @staticmethod
@@ -33,11 +35,11 @@ class LolPlayerAdapter:
             "prenom":            prenom,
             "date_de_naissance": dob,
             "pseudo":            pseudo,
-            "pays_de_naissance": str(row["country_of_birth"]) if pd.notna(row.get("country_of_birth")) else None,
+            "pays_de_naissance": str(row["nationality"]) if pd.notna(row.get("nationality")) else None,
             "sexe":              None,
             "poids":             0.0,
             "taille":            0.0,
-            "role":              str(row["role"]) if pd.notna(row.get("role")) else None,
+            "role":              str(row["race"]) if pd.notna(row.get("race")) else None,
             "team":              None,
-            "sport":             LOL,
+            "sport":             STARCRAFT2,
         }
