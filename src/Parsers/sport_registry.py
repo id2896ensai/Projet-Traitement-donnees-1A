@@ -1,5 +1,7 @@
 # Registre centralisé : associe chaque sport aux adaptateurs,
-# chemins CSV et paramètres de chargement.
+# chemins CSV absolus et paramètres de chargement.
+from pathlib import Path
+from typing import Any
 
 from Parsers.Adapters.Basketball.BasketballTeamAdapter import BasketballTeamAdapter
 from Parsers.Adapters.Basketball.BasketballPlayerAdapter import BasketballPlayerAdapter
@@ -40,17 +42,23 @@ from Parsers.Adapters.CS2.CS2TeamAdapter import CS2TeamAdapter
 from Parsers.Adapters.CS2.CS2PlayerAdapter import CS2PlayerAdapter
 from Parsers.Adapters.CS2.CS2MatchAdapter import CS2MatchAdapter
 
+# Racine des données : remonte de src/Parsers/ → src/ → racine projet
+_DATA = Path(__file__).resolve().parent.parent.parent / "data"
+
+# Type du registre : dict sport → config de chargement
+SportConfig = dict[str, Any]
+
 # Chaque entrée contient :
-#   team_csv / player_csv / match_csv  : chemins relatifs depuis src/
+#   team_csv / player_csv / match_csv  : chemins absolus vers les CSV
 #   TeamAdapter / PlayerAdapter / MatchAdapter : classes d'adaptateurs
-#   match_kwarg  : nom du paramètre de l'équipe dans MatchAdapter.__init__
+#   match_kwarg  : nom du paramètre équipe dans MatchAdapter.__init__
 #   team_key     : attribut utilisé pour indexer les équipes (load_as_dict)
 #   sport_en_equipe : True = stats collectifs disponibles
-SPORTS_REGISTRY = {
+SPORTS_REGISTRY: dict[str, SportConfig] = {
     "Basketball": {
-        "team_csv":        "../data/basketball/team.csv",
-        "player_csv":      "../data/basketball/player.csv",
-        "match_csv":       "../data/basketball/game.csv",
+        "team_csv":        str(_DATA / "basketball" / "team.csv"),
+        "player_csv":      str(_DATA / "basketball" / "player.csv"),
+        "match_csv":       str(_DATA / "basketball" / "game.csv"),
         "TeamAdapter":     BasketballTeamAdapter,
         "PlayerAdapter":   BasketballPlayerAdapter,
         "MatchAdapter":    BasketballMatchAdapter,
@@ -59,9 +67,9 @@ SPORTS_REGISTRY = {
         "sport_en_equipe": True,
     },
     "Badminton": {
-        "team_csv":        "../data/badminton/player.csv",
-        "player_csv":      "../data/badminton/player.csv",
-        "match_csv":       "../data/badminton/match.csv",
+        "team_csv":        str(_DATA / "badminton" / "player.csv"),
+        "player_csv":      str(_DATA / "badminton" / "player.csv"),
+        "match_csv":       str(_DATA / "badminton" / "match.csv"),
         "TeamAdapter":     BadmintonTeamAdapter,
         "PlayerAdapter":   BadmintonPlayerAdapter,
         "MatchAdapter":    BadmintonMatchAdapter,
@@ -70,9 +78,9 @@ SPORTS_REGISTRY = {
         "sport_en_equipe": False,
     },
     "Echecs": {
-        "team_csv":        "../data/chess/player.csv",
-        "player_csv":      "../data/chess/player.csv",
-        "match_csv":       "../data/chess/match.csv",
+        "team_csv":        str(_DATA / "chess" / "player.csv"),
+        "player_csv":      str(_DATA / "chess" / "player.csv"),
+        "match_csv":       str(_DATA / "chess" / "match.csv"),
         "TeamAdapter":     ChessTeamAdapter,
         "PlayerAdapter":   ChessPlayerAdapter,
         "MatchAdapter":    ChessMatchAdapter,
@@ -81,9 +89,9 @@ SPORTS_REGISTRY = {
         "sport_en_equipe": False,
     },
     "Tennis": {
-        "team_csv":        "../data/tennis/atp_players_2024.csv",
-        "player_csv":      "../data/tennis/atp_players_2024.csv",
-        "match_csv":       "../data/tennis/atp_matches_2024.csv",
+        "team_csv":        str(_DATA / "tennis" / "atp_players_2024.csv"),
+        "player_csv":      str(_DATA / "tennis" / "atp_players_2024.csv"),
+        "match_csv":       str(_DATA / "tennis" / "atp_matches_2024.csv"),
         "TeamAdapter":     TennisTeamAdapter,
         "PlayerAdapter":   TennisPlayerAdapter,
         "MatchAdapter":    TennisMatchAdapter,
@@ -92,9 +100,9 @@ SPORTS_REGISTRY = {
         "sport_en_equipe": False,
     },
     "Volleyball": {
-        "team_csv":        "../data/volleyball/country.csv",
-        "player_csv":      "../data/volleyball/player_men.csv",
-        "match_csv":       "../data/volleyball/match_men.csv",
+        "team_csv":        str(_DATA / "volleyball" / "country.csv"),
+        "player_csv":      str(_DATA / "volleyball" / "player_men.csv"),
+        "match_csv":       str(_DATA / "volleyball" / "match_men.csv"),
         "TeamAdapter":     VolleyballTeamAdapter,
         "PlayerAdapter":   VolleyballPlayerAdapter,
         "MatchAdapter":    VolleyballMatchAdapter,
@@ -103,9 +111,9 @@ SPORTS_REGISTRY = {
         "sport_en_equipe": True,
     },
     "Starcraft 2": {
-        "team_csv":        "../data/starcraft_2/player.csv",
-        "player_csv":      "../data/starcraft_2/player.csv",
-        "match_csv":       "../data/starcraft_2/match.csv",
+        "team_csv":        str(_DATA / "starcraft_2" / "player.csv"),
+        "player_csv":      str(_DATA / "starcraft_2" / "player.csv"),
+        "match_csv":       str(_DATA / "starcraft_2" / "match.csv"),
         "TeamAdapter":     Starcraft2TeamAdapter,
         "PlayerAdapter":   Starcraft2PlayerAdapter,
         "MatchAdapter":    Starcraft2MatchAdapter,
@@ -114,9 +122,9 @@ SPORTS_REGISTRY = {
         "sport_en_equipe": False,
     },
     "League of Legends": {
-        "team_csv":        "../data/league_of_legends/team.csv",
-        "player_csv":      "../data/league_of_legends/player.csv",
-        "match_csv":       "../data/league_of_legends/match.csv",
+        "team_csv":        str(_DATA / "league_of_legends" / "team.csv"),
+        "player_csv":      str(_DATA / "league_of_legends" / "player.csv"),
+        "match_csv":       str(_DATA / "league_of_legends" / "match.csv"),
         "TeamAdapter":     LolTeamAdapter,
         "PlayerAdapter":   LolPlayerAdapter,
         "MatchAdapter":    LolMatchAdapter,
@@ -125,9 +133,9 @@ SPORTS_REGISTRY = {
         "sport_en_equipe": True,
     },
     "Football (Ligues europeennes)": {
-        "team_csv":        "../data/football_european_leagues/team.csv",
-        "player_csv":      "../data/football_european_leagues/player.csv",
-        "match_csv":       "../data/football_european_leagues/match.csv",
+        "team_csv":        str(_DATA / "football_european_leagues" / "team.csv"),
+        "player_csv":      str(_DATA / "football_european_leagues" / "player.csv"),
+        "match_csv":       str(_DATA / "football_european_leagues" / "match.csv"),
         "TeamAdapter":     FootballTeamAdapter,
         "PlayerAdapter":   FootballPlayerAdapter,
         "MatchAdapter":    FootballMatchAdapter,
@@ -136,9 +144,9 @@ SPORTS_REGISTRY = {
         "sport_en_equipe": True,
     },
     "Football (Champions League)": {
-        "team_csv":        "../data/football_champions_league/team.csv",
+        "team_csv":        str(_DATA / "football_champions_league" / "team.csv"),
         "player_csv":      None,
-        "match_csv":       "../data/football_champions_league/match.csv",
+        "match_csv":       str(_DATA / "football_champions_league" / "match.csv"),
         "TeamAdapter":     FootballCLTeamAdapter,
         "PlayerAdapter":   None,
         "MatchAdapter":    FootballCLMatchAdapter,
@@ -147,9 +155,9 @@ SPORTS_REGISTRY = {
         "sport_en_equipe": True,
     },
     "CS2": {
-        "team_csv":        "../data/counter_strike_2/team.csv",
-        "player_csv":      "../data/counter_strike_2/player.csv",
-        "match_csv":       "../data/counter_strike_2/match.csv",
+        "team_csv":        str(_DATA / "counter_strike_2" / "team.csv"),
+        "player_csv":      str(_DATA / "counter_strike_2" / "player.csv"),
+        "match_csv":       str(_DATA / "counter_strike_2" / "match.csv"),
         "TeamAdapter":     CS2TeamAdapter,
         "PlayerAdapter":   CS2PlayerAdapter,
         "MatchAdapter":    CS2MatchAdapter,
