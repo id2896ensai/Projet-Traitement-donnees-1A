@@ -1,6 +1,0 @@
-season,stage,team_id_home,match_id,match_date,duration_min,goals_home,shots_home,shot_pct_home,saves_home,shots_on_goal_home,goals_7m_home,attempts_7m_home,pct_7m_home,assists_home,suspensions_home,yellows_home,reds_home,pts_home,team_id_away,goals_away,shots_away,shot_pct_away,saves_away,shots_on_goal_away,goals_7m_away,attempts_7m_away,pct_7m_away,assists_away,suspensions_away,yellows_away,reds_away,pts_away
-2023-2024,EHF Champions League,201,10001,2023-10-12,60,34,52,0.654,14,48,4,5,0.800,22,4,2,0,201,202,29,47,0.617,18,46,3,4,0.750,18,5,3,0,204
-2023-2024,EHF Champions League,203,10002,2023-10-14,60,31,49,0.633,11,42,2,3,0.667,19,6,3,0,203,204,28,44,0.636,15,47,5,6,0.833,17,4,2,0,204
-2023-2024,EHF Champions League,202,10003,2023-10-19,60,36,55,0.655,13,49,6,7,0.857,24,3,1,0,202,205,27,46,0.587,16,45,3,4,0.750,15,7,4,0,204
-2023-2024,EHF Champions League,201,10004,2023-11-02,60,30,48,0.625,12,44,3,4,0.750,18,5,2,0,201,203,32,51,0.627,17,50,4,5,0.800,21,3,1,0,203
-2023-2024,EHF Champions League,204,10005,2023-11-09,60,33,50,0.660,16,53,5,6,0.833,20,4,2,1,204,202,31,48,0.646,15,51,4,5,0.800,19,6,3,0,204
