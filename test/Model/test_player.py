@@ -1,6 +1,6 @@
 import pytest
 from datetime import date
-from src.Model.player import Player
+from Model.player import Player
 
 
 @pytest.fixture

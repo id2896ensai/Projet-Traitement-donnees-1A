@@ -1,4 +1,4 @@
-from src.Common.utils import parse_boolean
+from Common.utils import parse_boolean
 
 
 def test_lowercase_string_is_properly_inferred():

@@ -2,7 +2,7 @@ import re
 import pytest
 from datetime import date
 
-from src.Model.competition import Competition
+from Model.competition import Competition
 
 
 @pytest.fixture

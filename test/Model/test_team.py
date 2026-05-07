@@ -1,8 +1,8 @@
 import pytest
 from datetime import date
-from src.Model.team import Team
-from src.Model.sport import Sport
-from src.Model.player import Player
+from Model.team import Team
+from Model.sport import Sport
+from Model.player import Player
 
 
 @pytest.fixture

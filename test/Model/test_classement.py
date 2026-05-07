@@ -1,9 +1,9 @@
 import pytest
 
-from src.Model.classement import Classement
-from src.Model.competition import Competition
-from src.Model.sport import Sport
-from src.Model.team import Team
+from Model.classement import Classement
+from Model.competition import Competition
+from Model.sport import Sport
+from Model.team import Team
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import pytest
 from datetime import date
 
-from src.Model.person import Person
+from Model.person import Person
 
 
 def test_person_creation():

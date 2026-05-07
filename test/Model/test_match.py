@@ -1,7 +1,7 @@
 import pytest
 from datetime import date
-from src.Model.match import Match
-from src.Model.sport import Sport
+from Model.match import Match
+from Model.sport import Sport
 
 
 @pytest.fixture

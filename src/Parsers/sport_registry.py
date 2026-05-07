@@ -27,9 +27,9 @@ from Parsers.Adapters.Starcraft2.Starcraft2TeamAdapter import Starcraft2TeamAdap
 from Parsers.Adapters.Starcraft2.Starcraft2PlayerAdapter import Starcraft2PlayerAdapter
 from Parsers.Adapters.Starcraft2.Starcraft2MatchAdapter import Starcraft2MatchAdapter
 
-from Parsers.Adapters.Lol.LolTeamAdapter import LolTeamAdapter
-from Parsers.Adapters.Lol.LolPlayerAdapter import LolPlayerAdapter
-from Parsers.Adapters.Lol.LolMatchAdapter import LolMatchAdapter
+from Parsers.Adapters.lol.LolTeamAdapter import LolTeamAdapter
+from Parsers.Adapters.lol.LolPlayerAdapter import LolPlayerAdapter
+from Parsers.Adapters.lol.LolMatchAdapter import LolMatchAdapter
 
 from Parsers.Adapters.Football.FootballTeamAdapter import FootballTeamAdapter
 from Parsers.Adapters.Football.FootballPlayerAdapter import FootballPlayerAdapter
@@ -103,6 +103,7 @@ SPORTS_REGISTRY: dict[str, SportConfig] = {
         "team_csv":        str(_DATA / "volleyball" / "country.csv"),
         "player_csv":      str(_DATA / "volleyball" / "player_men.csv"),
         "match_csv":       str(_DATA / "volleyball" / "match_men.csv"),
+        "coach_csv":       str(_DATA / "volleyball" / "coach_men.csv"),
         "TeamAdapter":     VolleyballTeamAdapter,
         "PlayerAdapter":   VolleyballPlayerAdapter,
         "MatchAdapter":    VolleyballMatchAdapter,
@@ -125,6 +126,7 @@ SPORTS_REGISTRY: dict[str, SportConfig] = {
         "team_csv":        str(_DATA / "league_of_legends" / "team.csv"),
         "player_csv":      str(_DATA / "league_of_legends" / "player.csv"),
         "match_csv":       str(_DATA / "league_of_legends" / "match.csv"),
+        "coach_csv":       str(_DATA / "league_of_legends" / "coach.csv"),
         "TeamAdapter":     LolTeamAdapter,
         "PlayerAdapter":   LolPlayerAdapter,
         "MatchAdapter":    LolMatchAdapter,
@@ -158,6 +160,7 @@ SPORTS_REGISTRY: dict[str, SportConfig] = {
         "team_csv":        str(_DATA / "counter_strike_2" / "team.csv"),
         "player_csv":      str(_DATA / "counter_strike_2" / "player.csv"),
         "match_csv":       str(_DATA / "counter_strike_2" / "match.csv"),
+        "coach_csv":       str(_DATA / "counter_strike_2" / "coach.csv"),
         "TeamAdapter":     CS2TeamAdapter,
         "PlayerAdapter":   CS2PlayerAdapter,
         "MatchAdapter":    CS2MatchAdapter,

@@ -1,6 +1,6 @@
 import re
 import pytest
-from src.Model.sport import Sport
+from Model.sport import Sport
 
 
 @pytest.mark.parametrize(
