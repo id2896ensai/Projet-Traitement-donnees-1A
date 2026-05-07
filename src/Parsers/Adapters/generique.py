@@ -34,7 +34,6 @@ Config attendue (dict) :
 
 import datetime
 import pandas as pd
-from Model.sport import Sport
 
 _DATE_INCONNUE = datetime.date(1900, 1, 1)
 

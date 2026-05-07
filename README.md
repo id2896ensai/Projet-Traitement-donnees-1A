@@ -2,7 +2,19 @@
 
 ## Goal
 
-This student project aims to determine who is the greatest football player of all time via a thorough statistical analysis
+This student project aims to analyse data from various sporting competitions (statistics, results).
+
+## Python Version
+
+Python 3.13
+
+## Installation
+
+Create and activate a virtual environment, then install the dependencies:
+`cd Projet-Traitement-donnees-1A`
+`python -m venv venv`
+`source venv\Scripts\activate` 
+`pip install -r requirements.txt`
 
 ## Usage
 
@@ -17,6 +29,15 @@ Depending on your installation, run one of these commands:
 `python -m pytest --cov`
 `conda run pytest --cov`
 `pytest --cov`
+
+## Linter
+This project uses Ruff as a linter. Run it with: 
+
+`ruff check .`
+
+## Documentation Style
+
+Docstrings follow the NumPy style.
 
 # Notes for students
 

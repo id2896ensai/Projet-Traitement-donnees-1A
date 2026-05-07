@@ -1,7 +1,6 @@
 # Vérifie que le diagramme de classes est respecté :
 # toutes les classes et méthodes attendues existent.
 import datetime
-import inspect
 import pytest
 
 from Model.sport import Sport

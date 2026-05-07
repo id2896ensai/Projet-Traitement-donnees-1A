@@ -1,6 +1,5 @@
 # Tests d'intégration : vérifie que chaque sport se charge correctement
 # via le registre SPORTS_REGISTRY (équipes, joueurs, matchs).
-import pytest
 from typing import Any
 
 from Parsers.sport_registry import SPORTS_REGISTRY
