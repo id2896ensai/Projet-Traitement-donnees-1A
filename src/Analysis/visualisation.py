@@ -6,22 +6,20 @@ Fonctions disponibles
   plot_bilan_equipe         — Camembert V/D/N pour une équipe
   plot_gagnants_par_saison  — Timeline colorée : un point = une victoire
   plot_summary_tableau      — Tableau stylé couleurs conditionnelles
-  autre chose peut etre
 """
 
 import datetime
 from collections import defaultdict
 
-import matplotlib.cm as cm
-import matplotlib.patches as mpatches
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import plotly.express as px
 
 from .stats import podium, stats_descriptives
+
 
 # ══════════════════════════════════════════════════════════════════
 # Helpers internes
 # ══════════════════════════════════════════════════════════════════
-
 
 def _vainqueur_match(match):
     """Retourne le participant gagnant d'un match, ou None si nul."""
@@ -55,48 +53,34 @@ def plot_podium(matches: list, sport_nom: str = "", n: int = 10) -> None:
     couleurs = [palette_podium[i] if i < 3 else "#5B8DB8"
                 for i in range(len(equipes))]
 
-    fig, ax = plt.subplots(figsize=(9, max(4, len(equipes) * 0.55)))
-    positions = list(range(len(equipes) - 1, -1, -1))
+    # Inverser pour avoir le 1er en haut
+    equipes_inv = equipes[::-1]
+    victoires_inv = victoires[::-1]
+    couleurs_inv = couleurs[::-1]
 
-    bars = ax.barh(positions, victoires, color=couleurs,
-                   height=0.6, edgecolor="white", linewidth=0.8)
-
-    for bar, val in zip(bars, victoires):
-        ax.text(
-            bar.get_width() + max(victoires) * 0.01,
-            bar.get_y() + bar.get_height() / 2,
-            str(val),
-            va="center", ha="left", fontsize=10,
-            fontweight="bold", color="#333333",
-        )
-
-    ax.set_yticks(positions)
-    ax.set_yticklabels(equipes, fontsize=10)
-    ax.set_xlabel("Nombre de victoires", fontsize=10)
-    ax.set_xlim(0, max(victoires) * 1.15)
-    ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
+    fig = go.Figure(go.Bar(
+        x=victoires_inv,
+        y=equipes_inv,
+        orientation="h",
+        marker_color=couleurs_inv,
+        text=victoires_inv,
+        textposition="outside",
+    ))
 
     titre = "Classement par victoires"
     if sport_nom:
         titre += f"  —  {sport_nom}"
-    ax.set_title(titre, fontsize=13, fontweight="bold", pad=14)
 
-    legende = [
-        mpatches.Patch(color="#F5C518", label="1er"),
-        mpatches.Patch(color="#A8A9AD", label="2ème"),
-        mpatches.Patch(color="#CD7F32", label="3ème"),
-    ]
-    if len(equipes) > 3:
-        legende.append(mpatches.Patch(color="#5B8DB8", label="Autres"))
-    ax.legend(handles=legende, fontsize=9, loc="lower right")
-
-    ax.xaxis.grid(True, linestyle="--", alpha=0.4, color="gray")
-    ax.set_axisbelow(True)
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-
-    plt.tight_layout()
-    plt.show()
+    fig.update_layout(
+        title=dict(text=titre, font=dict(size=16, color="#2C3E50")),
+        xaxis_title="Nombre de victoires",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        height=max(400, len(equipes) * 45),
+        xaxis=dict(gridcolor="#ebebeb"),
+        margin=dict(l=20, r=40, t=60, b=40),
+    )
+    fig.show()
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -114,7 +98,7 @@ def plot_bilan_equipe(matches: list, nom_equipe: str, sport_nom: str = "") -> No
     valeurs_raw = [stats["nb_victoires"], stats["nb_defaites"], stats["nb_nuls"]]
     couleurs_raw = ["#2ECC71", "#E74C3C", "#95A5A6"]
 
-    labels = [l for l, v in zip(labels_raw,   valeurs_raw) if v > 0]  # noqa: E741
+    labels = [l for l, v in zip(labels_raw, valeurs_raw) if v > 0]  # noqa: E741
     valeurs = [v for v in valeurs_raw if v > 0]
     couleurs = [c for c, v in zip(couleurs_raw, valeurs_raw) if v > 0]
 
@@ -122,34 +106,33 @@ def plot_bilan_equipe(matches: list, nom_equipe: str, sport_nom: str = "") -> No
         print("  Aucune donnée à afficher.")
         return
 
-    fig, ax = plt.subplots(figsize=(6, 5))
-    wedges, texts, autotexts = ax.pie(
-        valeurs,
-        labels=labels,
-        colors=couleurs,
-        autopct=lambda p: f"{p:.1f}%\n({int(round(p * sum(valeurs) / 100))})",
-        startangle=90,
-        wedgeprops={"edgecolor": "white", "linewidth": 1.5},
-        textprops={"fontsize": 11},
-    )
-    for at in autotexts:
-        at.set_fontsize(10)
-        at.set_fontweight("bold")
-        at.set_color("white")
-
     titre = f"Bilan  —  {nom_equipe}"
     if sport_nom:
         titre += f"  ({sport_nom})"
-    ax.set_title(titre, fontsize=13, fontweight="bold", pad=16)
-    fig.text(
-        0.5, 0.02,
-        f"{stats['nb_matchs']} matchs joués  |  "
-        f"Taux de victoire : {stats['pct_victoires']} %",
-        ha="center", fontsize=10, color="#555555",
+
+    fig = go.Figure(go.Pie(
+        labels=labels,
+        values=valeurs,
+        marker=dict(colors=couleurs, line=dict(color="white", width=2)),
+        textinfo="label+percent+value",
+        hoverinfo="label+value+percent",
+    ))
+
+    fig.update_layout(
+        title=dict(text=titre, font=dict(size=16, color="#2C3E50")),
+        annotations=[dict(
+            text=(
+                f"{stats['nb_matchs']} matchs joués  |  "
+                f"Taux de victoire : {stats['pct_victoires']} %"
+            ),
+            x=0.5, y=-0.1, showarrow=False,
+            font=dict(size=11, color="#555555"),
+            xref="paper", yref="paper",
+        )],
+        height=500,
+        margin=dict(t=80, b=80),
     )
-    ax.axis("equal")
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
-    plt.show()
+    fig.show()
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -161,10 +144,8 @@ def plot_gagnants_par_saison(matches: list, sport_nom: str = "") -> None:
     Timeline horizontale : chaque victoire = un point coloré.
     Axe X = date du match  |  Axe Y = équipe gagnante
     Les équipes sont triées du bas (moins de victoires) vers le haut (plus).
-    Fonctionne pour tout sport disposant d'une date_match.
     """
-    # ── Collecte ───────────────────────────────────────────────
-    points = []          # liste de (date, full_name_gagnant)
+    points = []
     for m in matches:
         date = getattr(m, "date_match", None)
         if date is None:
@@ -178,79 +159,53 @@ def plot_gagnants_par_saison(matches: list, sport_nom: str = "") -> None:
         print("  Pas de données exploitables pour la timeline.")
         return
 
-    # ── Palette : une couleur par équipe ───────────────────────
-    equipes_uniques = sorted({g for _, g in points})
-    nb_eq = len(equipes_uniques)
-
-    if nb_eq <= 10:
-        base_colors = list(plt.cm.tab10.colors)
-    elif nb_eq <= 20:
-        base_colors = list(plt.cm.tab20.colors)
-    else:
-        base_colors = [plt.cm.hsv(i / nb_eq) for i in range(nb_eq)]
-
-    couleur_eq = {eq: base_colors[i % len(base_colors)]
-                  for i, eq in enumerate(equipes_uniques)}
-
-    # ── Tri des équipes par nb victoires (plus haut = plus de victoires) ─
     compte = defaultdict(int)
     for _, g in points:
         compte[g] += 1
-    equipes_triees = sorted(equipes_uniques, key=lambda e: compte[e])
+
+    equipes_triees = sorted(compte.keys(), key=lambda e: compte[e])
     y_pos = {eq: i for i, eq in enumerate(equipes_triees)}
 
-    # ── Figure ─────────────────────────────────────────────────
-    hauteur = max(5, nb_eq * 0.40)
-    fig, ax = plt.subplots(figsize=(14, hauteur))
+    couleurs = px.colors.qualitative.Plotly
+    couleur_eq = {
+        eq: couleurs[i % len(couleurs)]
+        for i, eq in enumerate(equipes_triees)
+    }
 
-    # Lignes de fond
-    for i in range(len(equipes_triees)):
-        ax.axhline(i, color="#ebebeb", linewidth=0.7, zorder=0)
-
-    # Points
-    dates = [p[0] for p in points]
-    ys = [y_pos[p[1]] for p in points]
-    cols = [couleur_eq[p[1]] for p in points]
-    ax.scatter(dates, ys, c=cols, s=30, alpha=0.78, linewidths=0, zorder=2)
-
-    # Étiquettes Y  (nom + nb victoires)
-    fontsize_y = max(6, min(9, 130 // max(nb_eq, 1)))
-    ax.set_yticks(range(len(equipes_triees)))
-    ax.set_yticklabels(
-        [f"{eq}  ({compte[eq]})" for eq in equipes_triees],
-        fontsize=fontsize_y,
-    )
-    ax.yaxis.set_tick_params(length=0)
-
-    # Axe X : dates
-    ax.xaxis_date()
-    fig.autofmt_xdate(rotation=30, ha="right")
-    ax.set_xlabel("Date", fontsize=10)
+    fig = go.Figure()
+    for eq in equipes_triees:
+        dates_eq = [p[0] for p in points if p[1] == eq]
+        ys_eq = [y_pos[eq]] * len(dates_eq)
+        fig.add_trace(go.Scatter(
+            x=dates_eq,
+            y=ys_eq,
+            mode="markers",
+            name=f"{eq} ({compte[eq]})",
+            marker=dict(color=couleur_eq[eq], size=7, opacity=0.8),
+            hovertemplate=f"<b>{eq}</b><br>Date : %{{x}}<extra></extra>",
+        ))
 
     titre = "Gagnants par match — timeline"
     if sport_nom:
         titre += f"  |  {sport_nom}"
-    ax.set_title(titre, fontsize=13, fontweight="bold", pad=14)
 
-    # Légende latérale (seulement si le nombre d'équipes reste lisible)
-    if nb_eq <= 16:
-        legende = [
-            mpatches.Patch(color=couleur_eq[eq], label=eq)
-            for eq in reversed(equipes_triees)
-        ]
-        ax.legend(
-            handles=legende, fontsize=7,
-            loc="upper left", bbox_to_anchor=(1.01, 1),
-            borderaxespad=0, title="Équipes", title_fontsize=8,
-        )
-        plt.tight_layout(rect=[0, 0, 0.82, 1])
-    else:
-        plt.tight_layout()
-
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["left"].set_visible(False)
-    plt.show()
+    fig.update_layout(
+        title=dict(text=titre, font=dict(size=16, color="#2C3E50")),
+        xaxis_title="Date",
+        yaxis=dict(
+            tickmode="array",
+            tickvals=list(range(len(equipes_triees))),
+            ticktext=[f"{eq}  ({compte[eq]})" for eq in equipes_triees],
+            tickfont=dict(size=9),
+        ),
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        height=max(500, len(equipes_triees) * 25),
+        xaxis=dict(gridcolor="#ebebeb"),
+        margin=dict(l=20, r=200, t=60, b=60),
+        legend=dict(font=dict(size=8)),
+    )
+    fig.show()
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -259,12 +214,11 @@ def plot_gagnants_par_saison(matches: list, sport_nom: str = "") -> None:
 
 def plot_summary_tableau(matches: list, sport_nom: str = "", top_n: int = 15) -> None:
     """
-    Tableau matplotlib stylé : J / V / D / N / %V / Moy+ / Moy− / Net
-    ─ %V  : dégradé Rouge→Jaune→Vert selon la valeur relative
-    ─ Net : dégradé Rouge→Bleu selon la valeur relative
-    ─ Top 3 : numéro en Or / Argent / Bronze
+    Tableau plotly stylé : J / V / D / N / %V / Moy+ / Moy− / Net
+    ─ %V  : dégradé Rouge→Jaune→Vert
+    ─ Net : dégradé Rouge→Bleu
+    ─ Top 3 : Or / Argent / Bronze
     """
-    # ── Collecte de toutes les équipes présentes ───────────────
     equipes_vues: set[str] = set()
     for m in matches:
         for t in m.participants:
@@ -283,9 +237,9 @@ def plot_summary_tableau(matches: list, sport_nom: str = "", top_n: int = 15) ->
             "V":       s["nb_victoires"],
             "D":       s["nb_defaites"],
             "N":       s["nb_nuls"],
-            "%V":      s["pct_victoires"],          # déjà un float
-            "Moy +":   s["moy_pts_marques"],        # déjà un float
-            "Moy −":   s["moy_pts_encaisses"],      # déjà un float
+            "%V":      s["pct_victoires"],
+            "Moy +":   s["moy_pts_marques"],
+            "Moy −":   s["moy_pts_encaisses"],
             "Net":     net,
         })
 
@@ -293,125 +247,80 @@ def plot_summary_tableau(matches: list, sport_nom: str = "", top_n: int = 15) ->
         print("  Pas assez de données pour le tableau.")
         return
 
-    # Tri : %V décroissant, puis Net décroissant
     lignes.sort(key=lambda r: (r["%V"], r["Net"]), reverse=True)
     lignes = lignes[:top_n]
 
-    # ── Données textuelles ─────────────────────────────────────
-    colonnes = ["#", "Équipe", "J", "V", "D", "N", "%V", "Moy +", "Moy −", "Net"]
-    rows = []
-    for rang, r in enumerate(lignes, 1):
-        rows.append([
-            str(rang),
-            r["Équipe"][:28],
-            str(r["J"]),
-            str(r["V"]),
-            str(r["D"]),
-            str(r["N"]),
-            f"{r['%V']:.1f}",
-            f"{r['Moy +']:.1f}",
-            f"{r['Moy −']:.1f}",
-            f"{r['Net']:+.1f}",
-        ])
+    MEDAILLES = {0: "#F5C518", 1: "#A8A9AD", 2: "#CD7F32"}
 
-    # ── Figure ─────────────────────────────────────────────────
-    nb_lignes = len(rows)
-    hauteur_fig = max(3.5, nb_lignes * 0.44 + 1.4)
-    fig, ax = plt.subplots(figsize=(13, hauteur_fig))
-    ax.axis("off")
+    rangs = [str(i + 1) for i in range(len(lignes))]
+    equipes = [r["Équipe"][:28] for r in lignes]
+    j_vals = [str(r["J"]) for r in lignes]
+    v_vals = [str(r["V"]) for r in lignes]
+    d_vals = [str(r["D"]) for r in lignes]
+    n_vals = [str(r["N"]) for r in lignes]
+    pct_vals = [f"{r['%V']:.1f}" for r in lignes]
+    moy_plus = [f"{r['Moy +']:.1f}" for r in lignes]
+    moy_moins = [f"{r['Moy −']:.1f}" for r in lignes]
+    net_vals = [f"{r['Net']:+.1f}" for r in lignes]
+
+    # Couleurs colonne %V (RdYlGn)
+    pct_raw = [r["%V"] for r in lignes]
+    pct_min, pct_max = min(pct_raw), max(pct_raw)
+    pct_colors = [
+        f"rgba({int(255 * (1 - (v - pct_min) / max(pct_max - pct_min, 1)))}, "
+        f"{int(200 * (v - pct_min) / max(pct_max - pct_min, 1) + 55)}, 50, 0.7)"
+        for v in pct_raw
+    ]
+
+    # Couleurs colonne Net (rouge si négatif, bleu si positif)
+    net_raw = [r["Net"] for r in lignes]
+    net_colors = [
+        "rgba(52, 152, 219, 0.6)" if v >= 0 else "rgba(231, 76, 60, 0.6)"
+        for v in net_raw
+    ]
+
+    # Couleurs colonne rang (médailles)
+    rang_colors = [MEDAILLES.get(i, "#F8F9FA") for i in range(len(lignes))]
+    row_colors = ["#F8F9FA" if i % 2 == 0 else "#FFFFFF" for i in range(len(lignes))]
+
+    fig = go.Figure(go.Table(
+        header=dict(
+            values=["<b>#</b>", "<b>Équipe</b>", "<b>J</b>", "<b>V</b>",
+                    "<b>D</b>", "<b>N</b>", "<b>%V</b>",
+                    "<b>Moy +</b>", "<b>Moy −</b>", "<b>Net</b>"],
+            fill_color="#2C3E50",
+            font=dict(color="white", size=12),
+            align="center",
+            height=35,
+        ),
+        cells=dict(
+            values=[rangs, equipes, j_vals, v_vals, d_vals, n_vals,
+                    pct_vals, moy_plus, moy_moins, net_vals],
+            fill_color=[rang_colors, row_colors, row_colors, row_colors,
+                        row_colors, row_colors, pct_colors,
+                        row_colors, row_colors, net_colors],
+            font=dict(color="#2C3E50", size=11),
+            align=["center", "left"] + ["center"] * 8,
+            height=30,
+        ),
+    ))
 
     titre = "Classement général"
     if sport_nom:
         titre += f"  —  {sport_nom}"
-    ax.set_title(titre, fontsize=13, fontweight="bold", pad=10)
 
-    table = ax.table(
-        cellText=rows,
-        colLabels=colonnes,
-        loc="center",
-        cellLoc="center",
+    fig.update_layout(
+        title=dict(text=titre, font=dict(size=16, color="#2C3E50")),
+        height=max(400, len(lignes) * 35 + 120),
+        margin=dict(t=80, b=60),
+        annotations=[dict(
+            text=(
+                "J = matchs joués  |  V = Victoires  |  D = Défaites  |  N = Nuls  |  "
+                "Moy + = pts marqués/match  |  Moy − = pts encaissés/match"
+            ),
+            x=0.5, y=-0.05, showarrow=False,
+            font=dict(size=10, color="#555555"),
+            xref="paper", yref="paper",
+        )],
     )
-    table.auto_set_font_size(False)
-    table.set_fontsize(9.5)
-    table.scale(1, 1.6)
-
-    # ── Constantes de couleurs ─────────────────────────────────
-    HEADER_BG = "#2C3E50"
-    HEADER_FG = "white"
-    ROW_ODD = "#F8F9FA"
-    ROW_EVEN = "#FFFFFF"
-    BORDER_COL = "#DEE2E6"
-    MEDAILLES = {1: "#F5C518", 2: "#A8A9AD", 3: "#CD7F32"}
-
-    # Normalisation pour les gradients
-    pct_vals = [r["%V"] for r in lignes]
-    net_vals = [r["Net"] for r in lignes]
-    pct_min, pct_max = min(pct_vals), max(pct_vals)
-    net_min, net_max = min(net_vals),  max(net_vals)
-
-    def _norm(val, vmin, vmax):
-        return 0.5 if vmax == vmin else (val - vmin) / (vmax - vmin)
-
-    cmap_green = cm.get_cmap("RdYlGn")
-    cmap_blue = cm.get_cmap("RdBu")
-
-    def _luminance(rgba):
-        return 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
-
-    col_pct = colonnes.index("%V")
-    col_net = colonnes.index("Net")
-    col_eq = colonnes.index("Équipe")
-    col_rang = colonnes.index("#")
-
-    # ── Colorisation cellule par cellule ──────────────────────
-    for (row_i, col_j), cell in table.get_celld().items():
-        cell.set_edgecolor(BORDER_COL)
-        cell.set_linewidth(0.5)
-
-        if row_i == 0:
-            # En-tête
-            cell.set_facecolor(HEADER_BG)
-            cell.set_text_props(color=HEADER_FG, fontweight="bold")
-            continue
-
-        data = lignes[row_i - 1]
-        bg = ROW_ODD if row_i % 2 == 1 else ROW_EVEN
-
-        if col_j == col_rang and row_i in MEDAILLES:
-            cell.set_facecolor(MEDAILLES[row_i])
-            cell.set_text_props(fontweight="bold", color="#333333")
-
-        elif col_j == col_eq:
-            cell.set_facecolor(bg)
-            cell.set_text_props(ha="left", fontweight="bold", color="#2C3E50")
-            cell.PAD = 0.05
-
-        elif col_j == col_pct:
-            rgba = cmap_green(_norm(data["%V"], pct_min, pct_max))
-            cell.set_facecolor(rgba)
-            cell.set_text_props(
-                fontweight="bold",
-                color="white" if _luminance(rgba) < 0.5 else "#222222",
-            )
-
-        elif col_j == col_net:
-            rgba = cmap_blue(_norm(data["Net"], net_min, net_max))
-            cell.set_facecolor(rgba)
-            cell.set_text_props(
-                fontweight="bold",
-                color="white" if _luminance(rgba) < 0.5 else "#222222",
-            )
-
-        else:
-            cell.set_facecolor(bg)
-        # Légende des abréviations
-    fig.text(
-        0.5, 0.02,
-        "J = nombre total de matchs joués par l’équipe   |   V = Victoires   |   D = Défaites   |   N = Nuls | Moy + = moyenne de points marqués par match | Moy − = moyenne de points encaissés par match ",
-        ha="center",
-        fontsize=9,
-        color="#555555",
-    )
-
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
-    plt.show()
+    fig.show()
