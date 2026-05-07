@@ -21,6 +21,7 @@ from Analysis.stats import (  # noqa: E402
     matchs_joueur,
     stats_descriptives,
 )
+from Analysis.basket_avance import calculer_stats_basket  # noqa: E402
 from Model.match import Match  # noqa: E402
 from Model.team import Team  # noqa: E402
 
@@ -846,6 +847,143 @@ def admin_supprimer_sport(sports_custom: dict) -> None:
     _pause()
 
 
+def menu_stats_avancees_basket(cfg: dict, matches: list[Match]) -> None:
+    """Stats avancées d'une équipe Basketball choisie par l'utilisateur."""
+    print(SEP)
+    nom = input("  Nom / abreviation de l'equipe : ").strip()
+    if not nom:
+        print("Nom requis.")
+        _pause()
+        return
+
+    nom_resolu = _resoudre_equipe(matches, nom)
+    if nom_resolu != nom:
+        print(f"  (Equipe identifiee : {nom_resolu})")
+
+    print("\nCalcul des stats avancees...")
+    try:
+        df = calculer_stats_basket(cfg["match_csv"], cfg["team_csv"])
+    except Exception as exc:
+        print(f"Erreur lors du calcul : {exc}")
+        _pause()
+        return
+
+    # Recherche de l'équipe dans le DataFrame (full_name ou abbreviation)
+    mask = (df["full_name"].str.lower() == nom_resolu.lower()) | \
+           (df["abbreviation"].str.lower() == nom_resolu.lower())
+    if not mask.any():
+        # Deuxième tentative : correspondance partielle sur full_name
+        mask = df["full_name"].str.lower().str.contains(nom_resolu.lower(), na=False)
+    if not mask.any():
+        print(f"  Equipe '{nom_resolu}' introuvable dans les statistiques.")
+        _pause()
+        return
+
+    row = df[mask].iloc[0]
+    rang = int(df[mask].index[0]) + 1  # rang dans le classement NetRtg
+
+    # ── Affichage texte ────────────────────────────────────────
+    print(f"\n{SEP}")
+    print(f"STATS AVANCEES  —  {row['full_name']}  ({row['abbreviation']})")
+    print(f"  {row['city']}, {row['state']}   |   {int(row['nb_matchs'])} matchs")
+    print(f"  Rang NetRtg : {rang} / {len(df)}")
+    print()
+    print("  TRADITIONNELLES (moyennes par match)")
+    print(f"    PTS : {row['pts_pg']:>6.1f}   REB : {row['reb_pg']:>5.1f}   AST : {row['ast_pg']:>5.1f}")
+    print(f"    STL : {row['stl_pg']:>6.1f}   BLK : {row['blk_pg']:>5.1f}   TOV : {row['tov_pg']:>5.1f}")
+    print()
+    print("  AVANCEES")
+    print(f"    eFG%   : {row['efg_pct']*100:>5.1f}%   (qualite des tirs avec bonus 3pts)")
+    print(f"    TS%    : {row['ts_pct']*100:>5.1f}%   (efficacite reelle tirs + LF)")
+    print(f"    AST/TO : {row['ast_tov']:>5.2f}    (ratio passes decisives / pertes)")
+    print(f"    OREB%  : {row['oreb_pct']*100:>5.1f}%   (% rebonds offensifs captes)")
+    print(f"    DREB%  : {row['dreb_pct']*100:>5.1f}%   (% rebonds defensifs captes)")
+    print()
+    print("  RATINGS (pour 100 possessions)")
+    print(f"    OffRtg : {row['off_rtg']:>6.1f}   DefRtg : {row['def_rtg']:>6.1f}   NetRtg : {row['net_rtg']:>+6.1f}")
+    print(f"    Pace   : {row['pace']:>6.1f}   (possessions par 48 min)")
+    print()
+    print("  FOUR FACTORS")
+    print(f"    eFG%   : {row['efg_f']*100:>5.1f}%   TOV%   : {row['tov_pct']*100:>5.1f}%")
+    print(f"    OREB%  : {row['oreb_f']*100:>5.1f}%   FTR    : {row['ftr']:>5.3f}")
+
+    # ── Dashboard matplotlib ───────────────────────────────────
+    try:
+        import matplotlib.pyplot as plt
+        import matplotlib.gridspec as gridspec
+    except ImportError:
+        print("\n[matplotlib non installe — graphique indisponible]")
+        _pause()
+        return
+
+    ligue_med = df.median(numeric_only=True)
+
+    fig = plt.figure(figsize=(14, 9))
+    fig.suptitle(f"Dashboard  {row['full_name']}  —  rang NetRtg {rang}/{len(df)}",
+                 fontsize=13, fontweight="bold")
+    gs = gridspec.GridSpec(2, 2, figure=fig, hspace=0.5, wspace=0.4)
+
+    # 1. Stats traditionnelles vs médiane ligue
+    ax1 = fig.add_subplot(gs[0, 0])
+    trad_labels = ["PTS", "REB", "AST", "STL", "BLK", "TOV"]
+    trad_cols   = ["pts_pg", "reb_pg", "ast_pg", "stl_pg", "blk_pg", "tov_pg"]
+    team_vals  = [float(row[c]) for c in trad_cols]
+    ligue_vals = [float(ligue_med[c]) for c in trad_cols]
+    x = range(len(trad_labels))
+    w = 0.35
+    ax1.bar([xi - w/2 for xi in x], team_vals, width=w, label=row["abbreviation"], color="#3498db", alpha=0.85)
+    ax1.bar([xi + w/2 for xi in x], ligue_vals, width=w, label="Médiane ligue", color="#bdc3c7", alpha=0.85)
+    ax1.set_xticks(list(x))
+    ax1.set_xticklabels(trad_labels, fontsize=8)
+    ax1.set_title("Traditionnelles vs ligue")
+    ax1.legend(fontsize=7)
+
+    # 2. Ratings : OffRtg / DefRtg / NetRtg vs médiane
+    ax2 = fig.add_subplot(gs[0, 1])
+    rtg_labels = ["OffRtg", "DefRtg", "NetRtg"]
+    rtg_cols   = ["off_rtg", "def_rtg", "net_rtg"]
+    t_vals = [float(row[c]) for c in rtg_cols]
+    l_vals = [float(ligue_med[c]) for c in rtg_cols]
+    x2 = range(len(rtg_labels))
+    ax2.bar([xi - w/2 for xi in x2], t_vals, width=w, label=row["abbreviation"], color="#2ecc71", alpha=0.85)
+    ax2.bar([xi + w/2 for xi in x2], l_vals, width=w, label="Médiane ligue", color="#bdc3c7", alpha=0.85)
+    ax2.set_xticks(list(x2))
+    ax2.set_xticklabels(rtg_labels, fontsize=8)
+    ax2.set_title("Ratings vs ligue")
+    ax2.legend(fontsize=7)
+
+    # 3. Four Factors vs médiane ligue
+    ax3 = fig.add_subplot(gs[1, 0])
+    ff_labels = ["eFG%", "TOV%", "OREB%", "FTR"]
+    ff_cols   = ["efg_f", "tov_pct", "oreb_f", "ftr"]
+    t_ff = [float(row[c]) * 100 for c in ff_cols]
+    l_ff = [float(ligue_med[c]) * 100 for c in ff_cols]
+    x3 = range(len(ff_labels))
+    ax3.bar([xi - w/2 for xi in x3], t_ff, width=w, label=row["abbreviation"], color="#e67e22", alpha=0.85)
+    ax3.bar([xi + w/2 for xi in x3], l_ff, width=w, label="Médiane ligue", color="#bdc3c7", alpha=0.85)
+    ax3.set_xticks(list(x3))
+    ax3.set_xticklabels(ff_labels, fontsize=8)
+    ax3.set_title("Four Factors vs ligue (%)")
+    ax3.legend(fontsize=7)
+
+    # 4. Position dans le classement NetRtg (toutes équipes)
+    ax4 = fig.add_subplot(gs[1, 1])
+    colors_net = ["#e74c3c" if a != row["abbreviation"] else "#2ecc71"
+                  for a in df["abbreviation"]]
+    ax4.barh(list(range(len(df))), df["net_rtg"].tolist(), color=colors_net,
+             edgecolor="white", linewidth=0.3)
+    ax4.set_yticks(list(range(len(df))))
+    ax4.set_yticklabels(df["abbreviation"].tolist(), fontsize=6)
+    ax4.axvline(0, color="black", linewidth=0.8, linestyle="--")
+    ax4.set_xlabel("Net Rating")
+    ax4.set_title(f"Classement ligue (surbrillance : {row['abbreviation']})")
+    ax4.invert_yaxis()
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.show()
+    _pause()
+
+
 def menu_admin(sports_custom: dict) -> None:
     """Menu réservé à l'administrateur."""
     while True:
@@ -901,6 +1039,10 @@ def menu_sport(sport_nom: str) -> None:
         print("  7. Informations sur une equipe")
         if a_coaches:
             print("  8. Informations sur les coaches")
+        if sport_nom == "Tennis":
+            print("  9. Tournois et surfaces")
+        if sport_nom == "Basketball":
+            print("  9. Stats avancees (eFG%, TS%, NetRtg, dashboard)")
         print("  0. Retour au menu principal")
 
         choix = input("\n> ").strip()
@@ -928,14 +1070,12 @@ def menu_sport(sport_nom: str) -> None:
             menu_info_coach(sport_nom, cfg)
         elif choix == "9" and sport_nom == "Tennis":
             menu_tournois_tennis(cfg, teams)
+        elif choix == "9" and sport_nom == "Basketball":
+            menu_stats_avancees_basket(cfg, matches)
         elif choix == "0":
             break
         else:
-            # Option tennnis affichée dynamiquement
-            if sport_nom == "Tennis" and choix == "9":
-                menu_tournois_tennis(cfg, teams)
-            else:
-                print("Choix invalide.")
+            print("Choix invalide.")
 
 
 # ─── Menu principal ───────────────────────────────────────────
