@@ -1,6 +1,4 @@
 """
-src/Analysis/visualisation.py
-Visualisations matplotlib pour l'application de statistiques sportives.
 
 Fonctions disponibles
 ─────────────────────
@@ -8,6 +6,7 @@ Fonctions disponibles
   plot_bilan_equipe         — Camembert V/D/N pour une équipe
   plot_gagnants_par_saison  — Timeline colorée : un point = une victoire
   plot_summary_tableau      — Tableau stylé couleurs conditionnelles
+  autre chose peut etre
 """
 
 import datetime
