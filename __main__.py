@@ -273,9 +273,9 @@ def menu_info_coach(sport_nom: str, cfg: dict) -> None:
 
     for row in affichage:
         pseudo = str(row["pseudo"]).strip() if pd.notna(row.get("pseudo")) else None
-        nom    = str(row["name"]).strip() if pd.notna(row.get("name")) else None
+        nom = str(row["name"]).strip() if pd.notna(row.get("name")) else None
         equipe = str(row["team"]).strip() if pd.notna(row.get("team")) else None
-        dob    = str(row.get("birthdate", "")).strip() if pd.notna(row.get("birthdate")) else None
+        dob = str(row.get("birthdate", "")).strip() if pd.notna(row.get("birthdate")) else None
         nat = (
             str(row["nationality"]).strip() if pd.notna(row.get("nationality"))
             else str(row["country_of_birth"]).strip() if pd.notna(row.get("country_of_birth"))
@@ -306,7 +306,7 @@ def menu_matchs_badminton(cfg: dict) -> None:
     print(SEP)
     print("Filtres (Entree pour ignorer)")
     date_debut_str = input("  Date debut   (AAAA-MM-JJ) : ").strip()
-    date_fin_str   = input("  Date fin     (AAAA-MM-JJ) : ").strip()
+    date_fin_str = input("  Date fin     (AAAA-MM-JJ) : ").strip()
     filtre_tournoi = input("  Filtre tournoi             : ").strip().lower()
 
     try:
@@ -331,19 +331,19 @@ def menu_matchs_badminton(cfg: dict) -> None:
         print(f"\n  {len(df)} match(s) — affichage des {len(affichage)} premiers :\n")
 
         for _, row in affichage.iterrows():
-            date     = row["date"].strftime("%Y-%m-%d") if pd.notna(row.get("date")) else "?"
-            tournoi  = str(row.get("tournament", "?"))
-            ville    = str(row.get("city", "")) if pd.notna(row.get("city")) else ""
-            pays     = str(row.get("country", "")) if pd.notna(row.get("country")) else ""
-            lieu     = f"{ville}, {pays}" if ville and pays else (ville or pays)
-            tour     = str(row.get("round", "")) if pd.notna(row.get("round")) else ""
-            p1       = str(row.get("player_1", "?"))
-            p2       = str(row.get("player_2", "?"))
-            winner   = str(row.get("winner", "?"))
-            scores   = [str(row.get(f"game_{i}_score", ""))
-                        for i in (1, 2, 3)
-                        if pd.notna(row.get(f"game_{i}_score"))
-                        and str(row.get(f"game_{i}_score", "")).strip()]
+            date = row["date"].strftime("%Y-%m-%d") if pd.notna(row.get("date")) else "?"
+            tournoi = str(row.get("tournament", "?"))
+            ville = str(row.get("city", "")) if pd.notna(row.get("city")) else ""
+            pays = str(row.get("country", "")) if pd.notna(row.get("country")) else ""
+            lieu = f"{ville}, {pays}" if ville and pays else (ville or pays)
+            tour = str(row.get("round", "")) if pd.notna(row.get("round")) else ""
+            p1 = str(row.get("player_1", "?"))
+            p2 = str(row.get("player_2", "?"))
+            winner = str(row.get("winner", "?"))
+            scores = [str(row.get(f"game_{i}_score", ""))
+                      for i in (1, 2, 3)
+                      if pd.notna(row.get(f"game_{i}_score"))
+                      and str(row.get(f"game_{i}_score", "")).strip()]
             score_str = "  |  ".join(scores)
 
             print(f"  [{date}]  {p1}  vs  {p2}")
@@ -365,8 +365,8 @@ def menu_matchs_footballcl(cfg: dict) -> None:
     print(SEP)
     print("Filtres (Entree pour ignorer)")
     date_debut_str = input("  Date debut   (AAAA-MM-JJ) : ").strip()
-    date_fin_str   = input("  Date fin     (AAAA-MM-JJ) : ").strip()
-    filtre_phase   = input("  Filtre phase (group/round) : ").strip().lower()
+    date_fin_str = input("  Date fin     (AAAA-MM-JJ) : ").strip()
+    filtre_phase = input("  Filtre phase (group/round) : ").strip().lower()
 
     try:
         df = pd.read_csv(cfg["match_csv"])
@@ -392,15 +392,17 @@ def menu_matchs_footballcl(cfg: dict) -> None:
         print(f"\n  {len(df)} match(s) — affichage des {len(affichage)} premiers :\n")
 
         for _, row in affichage.iterrows():
-            date    = row["date"].strftime("%Y-%m-%d") if pd.notna(row.get("date")) else "?"
-            phase   = str(row.get("phase", "")).strip() if pd.notna(row.get("phase")) else ""
-            groupe  = str(row.get("group", "")).strip() if pd.notna(row.get("group")) else ""
-            rnd     = str(row.get("round", "")).strip() if pd.notna(row.get("round")) else ""
-            eq1     = str(row.get("team_home", "?"))
-            eq2     = str(row.get("team_away", "?"))
-            s1      = str(row.get("score_team_home", "?"))
-            s2      = str(row.get("score_team_away", "?"))
-            contexte = "  |  ".join(filter(None, [phase, rnd, f"Groupe {groupe}" if groupe else ""]))
+            date = row["date"].strftime("%Y-%m-%d") if pd.notna(row.get("date")) else "?"
+            phase = str(row.get("phase", "")).strip() if pd.notna(row.get("phase")) else ""
+            groupe = str(row.get("group", "")).strip() if pd.notna(row.get("group")) else ""
+            rnd = str(row.get("round", "")).strip() if pd.notna(row.get("round")) else ""
+            eq1 = str(row.get("team_home", "?"))
+            eq2 = str(row.get("team_away", "?"))
+            s1 = str(row.get("score_team_home", "?"))
+            s2 = str(row.get("score_team_away", "?"))
+            contexte = "  |  ".join(
+                filter(None, [phase, rnd, f"Groupe {groupe}" if groupe else ""])
+            )
             print(f"  [{date}]  {eq1}  {s1} - {s2}  {eq2}")
             if contexte:
                 print(f"    {contexte}")
@@ -452,9 +454,9 @@ def menu_tournois_tennis(cfg: dict, teams: list[Team]) -> None:
             print(f"\n  Matchs pour '{detail}' :\n")
             for _, row in sub.head(30).iterrows():
                 winner = id_to_nom.get(int(row.get("winner_id", 0)), str(row.get("winner_id", "?")))
-                loser  = id_to_nom.get(int(row.get("loser_id", 0)), str(row.get("loser_id", "?")))
-                score  = str(row.get("score", "?"))
-                rnd    = str(row.get("round", "?"))
+                loser = id_to_nom.get(int(row.get("loser_id", 0)), str(row.get("loser_id", "?")))
+                score = str(row.get("score", "?"))
+                rnd = str(row.get("round", "?"))
                 print(f"    {rnd:<12} {winner} def. {loser}  {score}")
 
     except Exception as e:
@@ -470,7 +472,7 @@ def menu_matchs(matches: list[Match]) -> None:
     print(SEP)
     print("Filtre par date (Entree pour ignorer)")
     date_debut_str = input("  Date debut (AAAA-MM-JJ) : ").strip()
-    date_fin_str   = input("  Date fin   (AAAA-MM-JJ) : ").strip()
+    date_fin_str = input("  Date fin   (AAAA-MM-JJ) : ").strip()
 
     filtres = list(matches)
     try:
@@ -525,7 +527,7 @@ def menu_podium(matches: list[Match], sport_nom: str) -> None:
 def menu_matchs_joueur(matches: list[Match]) -> None:
     """Recherche des matchs pour un joueur donné (nom + prénom)."""
     print(SEP)
-    nom    = input("  Nom du joueur    : ").strip()
+    nom = input("  Nom du joueur    : ").strip()
     prenom = input("  Prenom du joueur : ").strip()
 
     if not nom or not prenom:
@@ -671,9 +673,9 @@ def _creer_entree_registre(cfg_json: dict) -> dict:
     )
 
     # Config partagée avec le sport instancié
-    team_cfg  = {**cfg_json, "sport_obj": sport_obj}
+    team_cfg = {**cfg_json, "sport_obj": sport_obj}
     player_cfg = {**cfg_json, "sport_obj": sport_obj}
-    match_cfg  = {**cfg_json, "sport_obj": sport_obj}
+    match_cfg = {**cfg_json, "sport_obj": sport_obj}
 
     # Factories sans argument (signature attendue par charger_donnees)
     def TeamAdapterFactory() -> GenericTeamAdapter:
@@ -700,7 +702,7 @@ def _creer_entree_registre(cfg_json: dict) -> dict:
         "sport_en_equipe": cfg_json.get("sport_en_equipe", True),
     }
     if cfg_json.get("player_csv"):
-        entree["player_csv"]    = cfg_json["player_csv"]
+        entree["player_csv"] = cfg_json["player_csv"]
         entree["PlayerAdapter"] = PlayerAdapterFactory
     return entree
 
@@ -748,10 +750,10 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
     cfg: dict = {"nom_sport": nom}
 
     # ── Infos générales ──────────────────────────────────────
-    cfg["categorie"]    = input("  Categorie (ex: Collectif, Individuel) : ").strip() or "Sport"
+    cfg["categorie"] = input("  Categorie (ex: Collectif, Individuel) : ").strip() or "Sport"
     nb = input("  Nb joueurs par equipe (defaut 2) : ").strip()
-    cfg["nb_joueurs"]   = int(nb) if nb.isdigit() and int(nb) > 0 else 2
-    cfg["description"]  = input("  Description courte : ").strip() or nom
+    cfg["nb_joueurs"] = int(nb) if nb.isdigit() and int(nb) > 0 else 2
+    cfg["description"] = input("  Description courte : ").strip() or nom
     collectif = input("  Sport collectif ? (o/n) : ").strip().lower()
     cfg["sport_en_equipe"] = collectif == "o"
 
@@ -762,12 +764,12 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
     if not cols:
         print("  Fichier invalide, abandon.")
         return
-    cfg["team_csv"]         = team_csv
-    cfg["col_full_name"]    = _choisir_col(cols, "Colonne nom d'equipe (full_name)")
+    cfg["team_csv"] = team_csv
+    cfg["col_full_name"] = _choisir_col(cols, "Colonne nom d'equipe (full_name)")
     cfg["col_abbreviation"] = _choisir_col(cols, "Colonne abreviation (optionnel)", False)
-    cfg["col_country"]      = _choisir_col(cols, "Colonne pays (optionnel)", False)
-    cfg["col_region"]       = _choisir_col(cols, "Colonne region (optionnel)", False)
-    cfg["col_city"]         = _choisir_col(cols, "Colonne ville (optionnel)", False)
+    cfg["col_country"] = _choisir_col(cols, "Colonne pays (optionnel)", False)
+    cfg["col_region"] = _choisir_col(cols, "Colonne region (optionnel)", False)
+    cfg["col_city"] = _choisir_col(cols, "Colonne ville (optionnel)", False)
 
     # Clé d'indexation des équipes (comment le match CSV identifie les équipes)
     print("\n  Cle d'indexation : quelle colonne de team.csv correspond aux noms")
@@ -782,14 +784,18 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
     if player_csv:
         pcols = _lire_colonnes(player_csv)
         if pcols:
-            cfg["player_csv"]          = player_csv
-            cfg["col_nom"]             = _choisir_col(pcols, "Colonne nom complet ou nom de famille")
-            cfg["col_prenom"]          = _choisir_col(pcols, "Colonne prenom (optionnel, sinon decoupe col_nom)", False)
-            cfg["col_pseudo"]          = _choisir_col(pcols, "Colonne pseudo/identifiant (optionnel)", False)
-            cfg["col_pays"]            = _choisir_col(pcols, "Colonne pays/nationalite (optionnel)", False)
-            cfg["col_role"]            = _choisir_col(pcols, "Colonne role/poste (optionnel)", False)
-            cfg["col_date_naissance"]  = _choisir_col(pcols, "Colonne date naissance (optionnel)", False)
-            cfg["col_taille"]          = _choisir_col(pcols, "Colonne taille en cm (optionnel)", False)
+            cfg["player_csv"] = player_csv
+            cfg["col_nom"] = _choisir_col(pcols, "Colonne nom complet ou nom de famille")
+            cfg["col_prenom"] = _choisir_col(
+                pcols, "Colonne prenom (optionnel, sinon decoupe col_nom)", False
+                )
+            cfg["col_pseudo"] = _choisir_col(pcols, "Colonne pseudo/identifiant (optionnel)", False)
+            cfg["col_pays"] = _choisir_col(pcols, "Colonne pays/nationalite (optionnel)", False)
+            cfg["col_role"] = _choisir_col(pcols, "Colonne role/poste (optionnel)", False)
+            cfg["col_date_naissance"] = _choisir_col(
+                pcols, "Colonne date naissance (optionnel)", False
+                )
+            cfg["col_taille"] = _choisir_col(pcols, "Colonne taille en cm (optionnel)", False)
 
     # ── CSV Matchs ────────────────────────────────────────────
     print("\n  --- CSV des matchs ---")
@@ -798,12 +804,12 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
     if not mcols:
         print("  Fichier invalide, abandon.")
         return
-    cfg["match_csv"]   = match_csv
-    cfg["col_team1"]   = _choisir_col(mcols, "Colonne equipe 1")
-    cfg["col_team2"]   = _choisir_col(mcols, "Colonne equipe 2")
-    cfg["col_score1"]  = _choisir_col(mcols, "Colonne score equipe 1")
-    cfg["col_score2"]  = _choisir_col(mcols, "Colonne score equipe 2")
-    cfg["col_date"]    = _choisir_col(mcols, "Colonne date (format AAAA-MM-JJ)")
+    cfg["match_csv"] = match_csv
+    cfg["col_team1"] = _choisir_col(mcols, "Colonne equipe 1")
+    cfg["col_team2"] = _choisir_col(mcols, "Colonne equipe 2")
+    cfg["col_score1"] = _choisir_col(mcols, "Colonne score equipe 1")
+    cfg["col_score2"] = _choisir_col(mcols, "Colonne score equipe 2")
+    cfg["col_date"] = _choisir_col(mcols, "Colonne date (format AAAA-MM-JJ)")
 
     # ── Test de chargement ────────────────────────────────────
     print(f"\n  Test de chargement de '{nom}'...")
@@ -811,8 +817,8 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
         entree = _creer_entree_registre(cfg)
         tl = GenericTeamLoader(entree["team_csv"], entree["TeamAdapter"]())
         teams = tl.load()
-        td    = tl.load_as_dict(entree["team_key"])
-        ml    = GenericMatchLoader(entree["match_csv"], entree["MatchAdapter"](equipes=td))
+        td = tl.load_as_dict(entree["team_key"])
+        ml = GenericMatchLoader(entree["match_csv"], entree["MatchAdapter"](equipes=td))
         matches = ml.load()
         print(f"  OK : {len(teams)} equipes, {len(matches)} matchs charges.")
     except Exception as e:
@@ -889,8 +895,16 @@ def menu_stats_avancees_basket(cfg: dict, matches: list[Match]) -> None:
     print(f"  Rang NetRtg : {rang} / {len(df)}")
     print()
     print("  TRADITIONNELLES (moyennes par match)")
-    print(f"    PTS : {row['pts_pg']:>6.1f}   REB : {row['reb_pg']:>5.1f}   AST : {row['ast_pg']:>5.1f}")
-    print(f"    STL : {row['stl_pg']:>6.1f}   BLK : {row['blk_pg']:>5.1f}   TOV : {row['tov_pg']:>5.1f}")
+    print(
+        f"    PTS : {row['pts_pg']:>6.1f}"
+        f"   REB : {row['reb_pg']:>5.1f}"
+        f"   AST : {row['ast_pg']:>5.1f}"
+    )
+    print(
+        f"    STL : {row['stl_pg']:>6.1f}"
+        f"   BLK : {row['blk_pg']:>5.1f}"
+        f"   TOV : {row['tov_pg']:>5.1f}"
+    )
     print()
     print("  AVANCEES")
     print(f"    eFG%   : {row['efg_pct']*100:>5.1f}%   (qualite des tirs avec bonus 3pts)")
@@ -900,7 +914,11 @@ def menu_stats_avancees_basket(cfg: dict, matches: list[Match]) -> None:
     print(f"    DREB%  : {row['dreb_pct']*100:>5.1f}%   (% rebonds defensifs captes)")
     print()
     print("  RATINGS (pour 100 possessions)")
-    print(f"    OffRtg : {row['off_rtg']:>6.1f}   DefRtg : {row['def_rtg']:>6.1f}   NetRtg : {row['net_rtg']:>+6.1f}")
+    print(
+        f"    OffRtg : {row['off_rtg']:>6.1f}"
+        f"   DefRtg : {row['def_rtg']:>6.1f}"
+        f"   NetRtg : {row['net_rtg']:>+6.1f}"
+    )
     print(f"    Pace   : {row['pace']:>6.1f}   (possessions par 48 min)")
     print()
     print("  FOUR FACTORS")
@@ -926,13 +944,15 @@ def menu_stats_avancees_basket(cfg: dict, matches: list[Match]) -> None:
     # 1. Stats traditionnelles vs médiane ligue
     ax1 = fig.add_subplot(gs[0, 0])
     trad_labels = ["PTS", "REB", "AST", "STL", "BLK", "TOV"]
-    trad_cols   = ["pts_pg", "reb_pg", "ast_pg", "stl_pg", "blk_pg", "tov_pg"]
-    team_vals  = [float(row[c]) for c in trad_cols]
+    trad_cols = ["pts_pg", "reb_pg", "ast_pg", "stl_pg", "blk_pg", "tov_pg"]
+    team_vals = [float(row[c]) for c in trad_cols]
     ligue_vals = [float(ligue_med[c]) for c in trad_cols]
     x = range(len(trad_labels))
     w = 0.35
-    ax1.bar([xi - w/2 for xi in x], team_vals, width=w, label=row["abbreviation"], color="#3498db", alpha=0.85)
-    ax1.bar([xi + w/2 for xi in x], ligue_vals, width=w, label="Médiane ligue", color="#bdc3c7", alpha=0.85)
+    ax1.bar([xi - w/2 for xi in x], team_vals, width=w, label=row["abbreviation"],
+            color="#3498db", alpha=0.85)
+    ax1.bar([xi + w/2 for xi in x], ligue_vals, width=w, label="Médiane ligue",
+            color="#bdc3c7", alpha=0.85)
     ax1.set_xticks(list(x))
     ax1.set_xticklabels(trad_labels, fontsize=8)
     ax1.set_title("Traditionnelles vs ligue")
@@ -941,12 +961,14 @@ def menu_stats_avancees_basket(cfg: dict, matches: list[Match]) -> None:
     # 2. Ratings : OffRtg / DefRtg / NetRtg vs médiane
     ax2 = fig.add_subplot(gs[0, 1])
     rtg_labels = ["OffRtg", "DefRtg", "NetRtg"]
-    rtg_cols   = ["off_rtg", "def_rtg", "net_rtg"]
+    rtg_cols = ["off_rtg", "def_rtg", "net_rtg"]
     t_vals = [float(row[c]) for c in rtg_cols]
     l_vals = [float(ligue_med[c]) for c in rtg_cols]
     x2 = range(len(rtg_labels))
-    ax2.bar([xi - w/2 for xi in x2], t_vals, width=w, label=row["abbreviation"], color="#2ecc71", alpha=0.85)
-    ax2.bar([xi + w/2 for xi in x2], l_vals, width=w, label="Médiane ligue", color="#bdc3c7", alpha=0.85)
+    ax2.bar([xi - w/2 for xi in x2], t_vals, width=w, label=row["abbreviation"],
+            color="#2ecc71", alpha=0.85)
+    ax2.bar([xi + w/2 for xi in x2], l_vals, width=w, label="Médiane ligue",
+            color="#bdc3c7", alpha=0.85)
     ax2.set_xticks(list(x2))
     ax2.set_xticklabels(rtg_labels, fontsize=8)
     ax2.set_title("Ratings vs ligue")
@@ -955,12 +977,14 @@ def menu_stats_avancees_basket(cfg: dict, matches: list[Match]) -> None:
     # 3. Four Factors vs médiane ligue
     ax3 = fig.add_subplot(gs[1, 0])
     ff_labels = ["eFG%", "TOV%", "OREB%", "FTR"]
-    ff_cols   = ["efg_f", "tov_pct", "oreb_f", "ftr"]
+    ff_cols = ["efg_f", "tov_pct", "oreb_f", "ftr"]
     t_ff = [float(row[c]) * 100 for c in ff_cols]
     l_ff = [float(ligue_med[c]) * 100 for c in ff_cols]
     x3 = range(len(ff_labels))
-    ax3.bar([xi - w/2 for xi in x3], t_ff, width=w, label=row["abbreviation"], color="#e67e22", alpha=0.85)
-    ax3.bar([xi + w/2 for xi in x3], l_ff, width=w, label="Médiane ligue", color="#bdc3c7", alpha=0.85)
+    ax3.bar([xi - w/2 for xi in x3], t_ff, width=w, label=row["abbreviation"],
+            color="#e67e22", alpha=0.85)
+    ax3.bar([xi + w/2 for xi in x3], l_ff, width=w, label="Médiane ligue",
+            color="#bdc3c7", alpha=0.85)
     ax3.set_xticks(list(x3))
     ax3.set_xticklabels(ff_labels, fontsize=8)
     ax3.set_title("Four Factors vs ligue (%)")
