@@ -5,8 +5,9 @@ import pandas as pd
 from pathlib import Path
 from typing import Any
 
-# Ajoute src/ au chemin Python pour résoudre les imports
 sys.path.insert(0, str(Path(__file__).parent / "src"))
+
+from Analysis.visualisation import plot_podium, plot_bilan_equipe, plot_gagnants_par_saison, plot_summary_tableau
 
 from Parsers.Loaders.genericloaders import (  # noqa: E402
     GenericTeamLoader,
@@ -521,6 +522,7 @@ def menu_podium(matches: list[Match], sport_nom: str) -> None:
     for i, (equipe, nb) in enumerate(classement):
         print(f"  {medailles[i]} : {equipe.full_name}  ({nb} victoire(s))")
 
+    plot_podium(matches, sport_nom, n=10)
     _pause()
 
 
@@ -609,6 +611,7 @@ def menu_stats_descriptives(matches: list[Match]) -> None:
     print(f"    Moy. pts encaisses   : {stats['moy_pts_encaisses']}")
     print(f"    Meilleur score       : {stats['max_score']}")
     print(f"    Pire score           : {stats['min_score']}")
+    plot_bilan_equipe(matches, nom_resolu)
 
     _pause()
 
@@ -1067,6 +1070,8 @@ def menu_sport(sport_nom: str) -> None:
             print("  9. Tournois et surfaces")
         if sport_nom == "Basketball":
             print("  9. Stats avancees (eFG%, TS%, NetRtg, dashboard)")
+        print("  T. Timeline gagnants par saison")
+        print("  S. Tableau summary (classement general)")
         print("  0. Retour au menu principal")
 
         choix = input("\n> ").strip()
@@ -1096,6 +1101,10 @@ def menu_sport(sport_nom: str) -> None:
             menu_tournois_tennis(cfg, teams)
         elif choix == "9" and sport_nom == "Basketball":
             menu_stats_avancees_basket(cfg, matches)
+        elif choix.upper() == "T":
+            plot_gagnants_par_saison(matches, sport_nom)
+        elif choix.upper() == "S":
+            plot_summary_tableau(matches, sport_nom)
         elif choix == "0":
             break
         else:
