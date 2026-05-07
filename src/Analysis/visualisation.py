@@ -16,12 +16,12 @@ import matplotlib.cm as cm
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
-from .stats import podium, stats_descriptives, matchs_equipe
-
+from .stats import podium, stats_descriptives
 
 # ══════════════════════════════════════════════════════════════════
 # Helpers internes
 # ══════════════════════════════════════════════════════════════════
+
 
 def _vainqueur_match(match):
     """Retourne le participant gagnant d'un match, ou None si nul."""
@@ -48,7 +48,7 @@ def plot_podium(matches: list, sport_nom: str = "", n: int = 10) -> None:
         print("  Pas assez de données pour afficher le podium.")
         return
 
-    equipes  = [t.full_name for t, _ in classement]
+    equipes = [t.full_name for t, _ in classement]
     victoires = [v for _, v in classement]
 
     palette_podium = ["#F5C518", "#A8A9AD", "#CD7F32"]
@@ -110,12 +110,12 @@ def plot_bilan_equipe(matches: list, nom_equipe: str, sport_nom: str = "") -> No
         print(f"  {stats['erreur']}")
         return
 
-    labels_raw   = ["Victoires", "Défaites", "Nuls"]
-    valeurs_raw  = [stats["nb_victoires"], stats["nb_defaites"], stats["nb_nuls"]]
+    labels_raw = ["Victoires", "Défaites", "Nuls"]
+    valeurs_raw = [stats["nb_victoires"], stats["nb_defaites"], stats["nb_nuls"]]
     couleurs_raw = ["#2ECC71", "#E74C3C", "#95A5A6"]
 
-    labels   = [l for l, v in zip(labels_raw,   valeurs_raw) if v > 0]
-    valeurs  = [v for v in valeurs_raw if v > 0]
+    labels = [l for l, v in zip(labels_raw,   valeurs_raw) if v > 0]  # noqa: E741
+    valeurs = [v for v in valeurs_raw if v > 0]
     couleurs = [c for c, v in zip(couleurs_raw, valeurs_raw) if v > 0]
 
     if not valeurs:
@@ -209,8 +209,8 @@ def plot_gagnants_par_saison(matches: list, sport_nom: str = "") -> None:
 
     # Points
     dates = [p[0] for p in points]
-    ys    = [y_pos[p[1]] for p in points]
-    cols  = [couleur_eq[p[1]] for p in points]
+    ys = [y_pos[p[1]] for p in points]
+    cols = [couleur_eq[p[1]] for p in points]
     ax.scatter(dates, ys, c=cols, s=30, alpha=0.78, linewidths=0, zorder=2)
 
     # Étiquettes Y  (nom + nb victoires)
@@ -315,7 +315,7 @@ def plot_summary_tableau(matches: list, sport_nom: str = "", top_n: int = 15) ->
         ])
 
     # ── Figure ─────────────────────────────────────────────────
-    nb_lignes  = len(rows)
+    nb_lignes = len(rows)
     hauteur_fig = max(3.5, nb_lignes * 0.44 + 1.4)
     fig, ax = plt.subplots(figsize=(13, hauteur_fig))
     ax.axis("off")
@@ -336,31 +336,31 @@ def plot_summary_tableau(matches: list, sport_nom: str = "", top_n: int = 15) ->
     table.scale(1, 1.6)
 
     # ── Constantes de couleurs ─────────────────────────────────
-    HEADER_BG  = "#2C3E50"
-    HEADER_FG  = "white"
-    ROW_ODD    = "#F8F9FA"
-    ROW_EVEN   = "#FFFFFF"
+    HEADER_BG = "#2C3E50"
+    HEADER_FG = "white"
+    ROW_ODD = "#F8F9FA"
+    ROW_EVEN = "#FFFFFF"
     BORDER_COL = "#DEE2E6"
-    MEDAILLES  = {1: "#F5C518", 2: "#A8A9AD", 3: "#CD7F32"}
+    MEDAILLES = {1: "#F5C518", 2: "#A8A9AD", 3: "#CD7F32"}
 
     # Normalisation pour les gradients
     pct_vals = [r["%V"] for r in lignes]
-    net_vals  = [r["Net"]  for r in lignes]
+    net_vals = [r["Net"] for r in lignes]
     pct_min, pct_max = min(pct_vals), max(pct_vals)
-    net_min,  net_max  = min(net_vals),  max(net_vals)
+    net_min, net_max = min(net_vals),  max(net_vals)
 
     def _norm(val, vmin, vmax):
         return 0.5 if vmax == vmin else (val - vmin) / (vmax - vmin)
 
     cmap_green = cm.get_cmap("RdYlGn")
-    cmap_blue  = cm.get_cmap("RdBu")
+    cmap_blue = cm.get_cmap("RdBu")
 
     def _luminance(rgba):
         return 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
 
-    col_pct  = colonnes.index("%V")
-    col_net  = colonnes.index("Net")
-    col_eq   = colonnes.index("Équipe")
+    col_pct = colonnes.index("%V")
+    col_net = colonnes.index("Net")
+    col_eq = colonnes.index("Équipe")
     col_rang = colonnes.index("#")
 
     # ── Colorisation cellule par cellule ──────────────────────
@@ -375,7 +375,7 @@ def plot_summary_tableau(matches: list, sport_nom: str = "", top_n: int = 15) ->
             continue
 
         data = lignes[row_i - 1]
-        bg   = ROW_ODD if row_i % 2 == 1 else ROW_EVEN
+        bg = ROW_ODD if row_i % 2 == 1 else ROW_EVEN
 
         if col_j == col_rang and row_i in MEDAILLES:
             cell.set_facecolor(MEDAILLES[row_i])
