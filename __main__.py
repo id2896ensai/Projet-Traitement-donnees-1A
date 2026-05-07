@@ -1,5 +1,6 @@
 import sys
 import json
+import shutil
 import datetime
 import pandas as pd
 from pathlib import Path
@@ -27,6 +28,14 @@ from Model.match import Match  # noqa: E402
 from Model.team import Team  # noqa: E402
 
 SEP = "-" * 56
+_PROJECT_ROOT = Path(__file__).parent
+
+
+def _resolve_csv_path(p: str) -> str:
+    """Résout un chemin relatif depuis la racine projet."""
+    path = Path(p)
+    return str(path if path.is_absolute() else _PROJECT_ROOT / path)
+
 
 # ─── Authentification ─────────────────────────────────────────
 # Identifiants stockés en mémoire : {login: mot_de_passe}
@@ -696,8 +705,8 @@ def _creer_entree_registre(cfg_json: dict) -> dict:
             return self._inner.adapt(row)
 
     entree: dict = {
-        "team_csv":        cfg_json["team_csv"],
-        "match_csv":       cfg_json["match_csv"],
+        "team_csv":        _resolve_csv_path(cfg_json["team_csv"]),
+        "match_csv":       _resolve_csv_path(cfg_json["match_csv"]),
         "TeamAdapter":     TeamAdapterFactory,
         "MatchAdapter":    MatchAdapterFactory,
         "match_kwarg":     "equipes",
@@ -705,15 +714,15 @@ def _creer_entree_registre(cfg_json: dict) -> dict:
         "sport_en_equipe": cfg_json.get("sport_en_equipe", True),
     }
     if cfg_json.get("player_csv"):
-        entree["player_csv"] = cfg_json["player_csv"]
+        entree["player_csv"] = _resolve_csv_path(cfg_json["player_csv"])
         entree["PlayerAdapter"] = PlayerAdapterFactory
     return entree
 
 
-# ─── Wizard admin : ajouter un sport ──────────────────────────
+# ─── Helpers CSV ──────────────────────────────────────────────
 
 def _lire_colonnes(csv_path: str) -> list[str]:
-    """Retourne la liste des colonnes d'un CSV (ligne d'en-tête seulement)."""
+    """Retourne les colonnes d'un CSV sans le charger entièrement."""
     try:
         df = pd.read_csv(csv_path, nrows=0, sep=None, engine="python")
         return list(df.columns)
@@ -722,11 +731,10 @@ def _lire_colonnes(csv_path: str) -> list[str]:
         return []
 
 
-def _choisir_col(colonnes: list[str], label: str, obligatoire: bool = True) -> str | None:
-    """Affiche les colonnes disponibles et demande laquelle utiliser."""
-    print(f"    Colonnes : {', '.join(colonnes)}")
+def _demander_col(colonnes: list[str], label: str, obligatoire: bool = True) -> str | None:
+    """Demande une colonne parmi la liste (colonnes affichées une seule fois avant)."""
     while True:
-        val = input(f"    {label} : ").strip()
+        val = input(f"    {label}: ").strip()
         if not val:
             if not obligatoire:
                 return None
@@ -734,106 +742,285 @@ def _choisir_col(colonnes: list[str], label: str, obligatoire: bool = True) -> s
         elif val in colonnes:
             return val
         else:
-            print(f"    '{val}' introuvable. Colonnes : {', '.join(colonnes)}")
+            print(f"    '{val}' inconnu. Options: {', '.join(colonnes)}")
 
+
+def _copier_csv(src: str, sport_slug: str, dest_name: str) -> str:
+    """Copie un CSV dans data/<sport_slug>/ et retourne le chemin relatif."""
+    dest_dir = _PROJECT_ROOT / "data" / sport_slug
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / dest_name
+    shutil.copy2(src, dest)
+    return str(Path("data") / sport_slug / dest_name)
+
+
+# ─── Wizard admin : ajouter un sport ──────────────────────────
 
 def admin_ajouter_sport(sports_custom: dict) -> None:
-    """Wizard guidé pour ajouter un nouveau sport via CSV."""
+    """Wizard simplifié : CSV copiés dans data/, chemins relatifs sauvegardés."""
     print("\n" + SEP)
     print("AJOUT D'UN NOUVEAU SPORT\n")
 
     nom = input("  Nom du sport : ").strip()
     if not nom:
-        print("  Abandon.")
         return
     if nom in SPORTS_REGISTRY or nom in sports_custom:
         print(f"  '{nom}' existe deja.")
         return
 
-    cfg: dict = {"nom_sport": nom}
-
-    # ── Infos générales ──────────────────────────────────────
-    cfg["categorie"] = input("  Categorie (ex: Collectif, Individuel) : ").strip() or "Sport"
-    nb = input("  Nb joueurs par equipe (defaut 2) : ").strip()
-    cfg["nb_joueurs"] = int(nb) if nb.isdigit() and int(nb) > 0 else 2
-    cfg["description"] = input("  Description courte : ").strip() or nom
-    collectif = input("  Sport collectif ? (o/n) : ").strip().lower()
-    cfg["sport_en_equipe"] = collectif == "o"
+    slug = nom.lower().replace(" ", "_").replace("(", "").replace(")", "")
+    cfg: dict = {
+        "nom_sport":      nom,
+        "sport_en_equipe": input("  Sport collectif ? (o/n) : ").strip().lower() == "o",
+    }
 
     # ── CSV Équipes ───────────────────────────────────────────
-    print("\n  --- CSV des equipes ---")
-    team_csv = input("  Chemin vers team.csv : ").strip()
-    cols = _lire_colonnes(team_csv)
+    print("\n  -- Fichier equipes --")
+    team_src = input("  Chemin complet du fichier CSV equipes : ").strip()
+    cols = _lire_colonnes(team_src)
     if not cols:
         print("  Fichier invalide, abandon.")
         return
-    cfg["team_csv"] = team_csv
-    cfg["col_full_name"] = _choisir_col(cols, "Colonne nom d'equipe (full_name)")
-    cfg["col_abbreviation"] = _choisir_col(cols, "Colonne abreviation (optionnel)", False)
-    cfg["col_country"] = _choisir_col(cols, "Colonne pays (optionnel)", False)
-    cfg["col_region"] = _choisir_col(cols, "Colonne region (optionnel)", False)
-    cfg["col_city"] = _choisir_col(cols, "Colonne ville (optionnel)", False)
+    print(f"  Colonnes detectees : {', '.join(cols)}")
+    cfg["col_full_name"]    = _demander_col(cols, "Colonne NOM d'equipe (obligatoire)")
+    cfg["col_abbreviation"] = _demander_col(cols, "Colonne abreviation      (Entree=ignorer)", False)
+    cfg["col_country"]      = _demander_col(cols, "Colonne pays             (Entree=ignorer)", False)
+    cfg["col_city"]         = _demander_col(cols, "Colonne ville            (Entree=ignorer)", False)
+    cfg["col_region"]       = _demander_col(cols, "Colonne region           (Entree=ignorer)", False)
 
-    # Clé d'indexation des équipes (comment le match CSV identifie les équipes)
-    print("\n  Cle d'indexation : quelle colonne de team.csv correspond aux noms")
-    print("  d'equipes dans match.csv ? (full_name ou abbreviation)")
-    team_key_col = cfg["col_abbreviation"] if cfg.get("col_abbreviation") else cfg["col_full_name"]
-    rep = input(f"  Colonne cle (defaut: {team_key_col}) : ").strip()
-    cfg["team_key"] = rep if rep in cols else team_key_col
+    print("\n  Comment match.csv identifie les equipes ?")
+    print("  Si match.csv utilise un ID numerique (ex: team_id), indiquez la colonne ID de team.csv.")
+    print("  Si match.csv utilise les noms ou abreviations, laissez vide.")
+    col_id = _demander_col(cols, "Colonne ID equipe dans team.csv (Entree=ignorer)", False)
+    if col_id:
+        cfg["col_id"]   = col_id
+        cfg["team_key"] = "id"   # load_as_dict utilisera Team.id = valeur de col_id
+    else:
+        default_key = cfg.get("col_abbreviation") or cfg["col_full_name"]
+        rep = input(f"  Colonne cle pour les noms [{default_key}] : ").strip()
+        cfg["team_key"] = rep if rep in cols else default_key
+
+    cfg["team_csv"] = _copier_csv(team_src, slug, "team.csv")
 
     # ── CSV Joueurs (optionnel) ───────────────────────────────
-    print("\n  --- CSV des joueurs (optionnel) ---")
-    player_csv = input("  Chemin vers player.csv (Entree pour ignorer) : ").strip()
-    if player_csv:
-        pcols = _lire_colonnes(player_csv)
+    print("\n  -- Fichier joueurs (optionnel) --")
+    player_src = input("  Chemin complet (Entree=ignorer) : ").strip()
+    if player_src:
+        pcols = _lire_colonnes(player_src)
         if pcols:
-            cfg["player_csv"] = player_csv
-            cfg["col_nom"] = _choisir_col(pcols, "Colonne nom complet ou nom de famille")
-            cfg["col_prenom"] = _choisir_col(
-                pcols, "Colonne prenom (optionnel, sinon decoupe col_nom)", False
-                )
-            cfg["col_pseudo"] = _choisir_col(pcols, "Colonne pseudo/identifiant (optionnel)", False)
-            cfg["col_pays"] = _choisir_col(pcols, "Colonne pays/nationalite (optionnel)", False)
-            cfg["col_role"] = _choisir_col(pcols, "Colonne role/poste (optionnel)", False)
-            cfg["col_date_naissance"] = _choisir_col(
-                pcols, "Colonne date naissance (optionnel)", False
-                )
-            cfg["col_taille"] = _choisir_col(pcols, "Colonne taille en cm (optionnel)", False)
+            print(f"  Colonnes detectees : {', '.join(pcols)}")
+            cfg["col_nom"]            = _demander_col(pcols, "Colonne NOM (obligatoire)")
+            cfg["col_prenom"]         = _demander_col(pcols, "Colonne prenom           (Entree=ignorer)", False)
+            cfg["col_pseudo"]         = _demander_col(pcols, "Colonne pseudo           (Entree=ignorer)", False)
+            cfg["col_pays"]           = _demander_col(pcols, "Colonne pays             (Entree=ignorer)", False)
+            cfg["col_role"]           = _demander_col(pcols, "Colonne role/poste       (Entree=ignorer)", False)
+            cfg["col_date_naissance"] = _demander_col(pcols, "Colonne date naissance   (Entree=ignorer)", False)
+            cfg["col_taille"]         = _demander_col(pcols, "Colonne taille cm        (Entree=ignorer)", False)
+            cfg["player_csv"] = _copier_csv(player_src, slug, "player.csv")
 
     # ── CSV Matchs ────────────────────────────────────────────
-    print("\n  --- CSV des matchs ---")
-    match_csv = input("  Chemin vers match.csv : ").strip()
-    mcols = _lire_colonnes(match_csv)
+    print("\n  -- Fichier matchs --")
+    match_src = input("  Chemin complet du fichier CSV matchs : ").strip()
+    mcols = _lire_colonnes(match_src)
     if not mcols:
         print("  Fichier invalide, abandon.")
         return
-    cfg["match_csv"] = match_csv
-    cfg["col_team1"] = _choisir_col(mcols, "Colonne equipe 1")
-    cfg["col_team2"] = _choisir_col(mcols, "Colonne equipe 2")
-    cfg["col_score1"] = _choisir_col(mcols, "Colonne score equipe 1")
-    cfg["col_score2"] = _choisir_col(mcols, "Colonne score equipe 2")
-    cfg["col_date"] = _choisir_col(mcols, "Colonne date (format AAAA-MM-JJ)")
+    print(f"  Colonnes detectees : {', '.join(mcols)}")
+    cfg["col_team1"]  = _demander_col(mcols, "Colonne equipe/joueur 1  (obligatoire)")
+    cfg["col_team2"]  = _demander_col(mcols, "Colonne equipe/joueur 2  (obligatoire)")
+    cfg["col_score1"] = _demander_col(mcols, "Colonne score 1          (obligatoire)")
+    cfg["col_score2"] = _demander_col(mcols, "Colonne score 2          (obligatoire)")
+    cfg["col_date"]   = _demander_col(mcols, "Colonne date AAAA-MM-JJ  (obligatoire)")
+    cfg["match_csv"]  = _copier_csv(match_src, slug, "match.csv")
 
     # ── Test de chargement ────────────────────────────────────
-    print(f"\n  Test de chargement de '{nom}'...")
+    print("\n  Test de chargement...")
     try:
         entree = _creer_entree_registre(cfg)
-        tl = GenericTeamLoader(entree["team_csv"], entree["TeamAdapter"]())
-        teams = tl.load()
-        td = tl.load_as_dict(entree["team_key"])
-        ml = GenericMatchLoader(entree["match_csv"], entree["MatchAdapter"](equipes=td))
-        matches = ml.load()
-        print(f"  OK : {len(teams)} equipes, {len(matches)} matchs charges.")
+        tl     = GenericTeamLoader(entree["team_csv"], entree["TeamAdapter"]())
+        teams  = tl.load()
+        td     = tl.load_as_dict(entree["team_key"])
+        ml     = GenericMatchLoader(entree["match_csv"], entree["MatchAdapter"](equipes=td))
+        matchs = ml.load()
+        print(f"  OK : {len(teams)} equipes, {len(matchs)} matchs charges.")
     except Exception as e:
-        print(f"  Erreur lors du test : {e}")
-        print("  Verifiez les chemins et les noms de colonnes.")
+        print(f"  Erreur : {e}")
+        print("  Verifiez les colonnes. Les fichiers ont quand meme ete copies dans data/{slug}/")
         return
 
-    # ── Sauvegarde ────────────────────────────────────────────
     sports_custom[nom] = cfg
     _sauver_sports_custom(sports_custom)
-    print(f"\n  Sport '{nom}' ajoute avec succes !")
+    print(f"\n  Sport '{nom}' ajoute ! Fichiers dans data/{slug}/")
     _pause()
+
+
+# ─── Admin : gestion des données CSV ──────────────────────────
+
+def _csvs_du_sport(sport_nom: str, sports_custom: dict) -> dict[str, str]:
+    """Retourne {label: chemin_absolu} pour tous les CSV d'un sport."""
+    cfg = SPORTS_REGISTRY.get(sport_nom) or sports_custom.get(sport_nom) or {}
+    result: dict[str, str] = {}
+    for key, label in [("team_csv", "Equipes"), ("player_csv", "Joueurs"),
+                       ("match_csv", "Matchs"), ("coach_csv", "Coaches")]:
+        val = cfg.get(key)
+        if val:
+            result[label] = _resolve_csv_path(str(val))
+    return result
+
+
+def _afficher_df_page(df: pd.DataFrame, titre: str, n: int = 25) -> None:
+    """Affiche les n premières lignes avec numéros de ligne."""
+    cols = list(df.columns)
+    print(f"\n{SEP}\n{titre}  ({len(df)} lignes)\n")
+    print(f"  Colonnes : {', '.join(cols)}\n")
+    for i, row in df.head(n).iterrows():
+        vals = "  |  ".join(f"{str(row[c])[:18]:<18}" for c in cols[:5])
+        print(f"  [{i:>4}]  {vals}")
+    if len(df) > n:
+        print(f"\n  ... {len(df) - n} lignes non affichees (affichage limite a {n})")
+
+
+def _chercher_lignes(df: pd.DataFrame, query: str) -> pd.DataFrame:
+    """Recherche insensible à la casse dans toutes les colonnes."""
+    mask = pd.Series(False, index=df.index)
+    for col in df.columns:
+        try:
+            mask |= df[col].astype(str).str.contains(query, case=False, na=False)
+        except Exception:
+            pass
+    return df[mask]
+
+
+def _selectionner_ligne(df: pd.DataFrame) -> int | None:
+    """Affiche le df, laisse l'utilisateur chercher puis choisir un index."""
+    _afficher_df_page(df, "Donnees")
+    query = input("\n  Recherche (mot-cle) ou numero de ligne directement : ").strip()
+    if not query:
+        return None
+    if query.isdigit() and int(query) in df.index:
+        return int(query)
+    resultats = _chercher_lignes(df, query)
+    if resultats.empty:
+        print("  Aucun resultat.")
+        return None
+    _afficher_df_page(resultats, f"Resultats pour '{query}'")
+    num = input("  Numero de ligne : ").strip()
+    if num.isdigit() and int(num) in resultats.index:
+        return int(num)
+    print("  Numero invalide.")
+    return None
+
+
+def _admin_ajouter_ligne(path: str) -> None:
+    df = pd.read_csv(path)
+    print(f"\n  Colonnes : {', '.join(df.columns)}")
+    print("  Entrez les valeurs (Entree = laisser vide) :\n")
+    new_row = {col: input(f"    {col} : ").strip() for col in df.columns}
+    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+    df.to_csv(path, index=False)
+    print("  Ligne ajoutee.")
+
+
+def _admin_modifier_ligne(path: str) -> None:
+    df = pd.read_csv(path)
+    idx = _selectionner_ligne(df)
+    if idx is None:
+        return
+    print(f"\n  Modification ligne {idx} (Entree = garder la valeur actuelle) :\n")
+    for col in df.columns:
+        actuel = df.at[idx, col]
+        val = input(f"    {col} [{actuel}] : ").strip()
+        if val:
+            df.at[idx, col] = val
+    df.to_csv(path, index=False)
+    print("  Modifications enregistrees.")
+
+
+def _admin_supprimer_ligne(path: str) -> None:
+    df = pd.read_csv(path)
+    idx = _selectionner_ligne(df)
+    if idx is None:
+        return
+    print("\n  Ligne a supprimer :")
+    for col in df.columns:
+        print(f"    {col} : {df.at[idx, col]}")
+    if input("\n  Confirmer ? (o/n) : ").strip().lower() == "o":
+        df = df.drop(index=idx).reset_index(drop=True)
+        df.to_csv(path, index=False)
+        print("  Ligne supprimee.")
+    else:
+        print("  Annule.")
+
+
+def _admin_gerer_fichier(path: str, label: str) -> None:
+    """Sous-menu : voir / ajouter / modifier / supprimer dans un CSV."""
+    while True:
+        print(f"\n{SEP}\nFICHIER  {label}\n")
+        print("  1. Voir les donnees")
+        print("  2. Ajouter une ligne")
+        print("  3. Modifier une ligne")
+        print("  4. Supprimer une ligne")
+        print("  0. Retour")
+        choix = input("\n> ").strip()
+        try:
+            if choix == "1":
+                _afficher_df_page(pd.read_csv(path), label, n=30)
+                _pause()
+            elif choix == "2":
+                _admin_ajouter_ligne(path)
+                _pause()
+            elif choix == "3":
+                _admin_modifier_ligne(path)
+                _pause()
+            elif choix == "4":
+                _admin_supprimer_ligne(path)
+                _pause()
+            elif choix == "0":
+                break
+            else:
+                print("  Choix invalide.")
+        except Exception as e:
+            print(f"  Erreur : {e}")
+
+
+def admin_gerer_donnees(sports_custom: dict) -> None:
+    """Permet à l'admin de gérer les données CSV de n'importe quel sport."""
+    tous = list(SPORTS_REGISTRY.keys()) + list(sports_custom.keys())
+    print(f"\n{SEP}\nGESTION DES DONNEES — choisir un sport\n")
+    for i, nom in enumerate(tous, 1):
+        tag = "[custom] " if nom in sports_custom else "[integre]"
+        print(f"  {i:2}. {tag} {nom}")
+    print("   0. Retour")
+
+    choix = input("\n> ").strip()
+    if choix == "0" or not choix.isdigit():
+        return
+    idx = int(choix) - 1
+    if not (0 <= idx < len(tous)):
+        print("  Choix invalide.")
+        return
+
+    sport_nom = tous[idx]
+    csvs = _csvs_du_sport(sport_nom, sports_custom)
+    if not csvs:
+        print("  Aucun fichier CSV trouve pour ce sport.")
+        _pause()
+        return
+
+    while True:
+        print(f"\n{SEP}\nFICHIERS  {sport_nom}\n")
+        items = list(csvs.items())
+        for i, (label, path) in enumerate(items, 1):
+            print(f"  {i}. {label}  ({path})")
+        print("  0. Retour")
+        c = input("\n> ").strip()
+        if c == "0":
+            break
+        if c.isdigit() and 1 <= int(c) <= len(items):
+            label, path = items[int(c) - 1]
+            _admin_gerer_fichier(path, f"{sport_nom} / {label}")
+        else:
+            print("  Choix invalide.")
 
 
 def admin_supprimer_sport(sports_custom: dict) -> None:
@@ -1019,6 +1206,7 @@ def menu_admin(sports_custom: dict) -> None:
         print("  1. Ajouter un nouveau sport (wizard CSV)")
         print("  2. Supprimer un sport personnalise")
         print("  3. Lister tous les sports actifs")
+        print("  4. Gerer les donnees d'un sport (voir / ajouter / modifier / supprimer)")
         print("  0. Retour")
 
         choix = input("\n> ").strip()
@@ -1035,6 +1223,8 @@ def menu_admin(sports_custom: dict) -> None:
                 for s in sports_custom:
                     print(f"    [custom]   {s}")
             _pause()
+        elif choix == "4":
+            admin_gerer_donnees(sports_custom)
         elif choix == "0":
             break
         else:

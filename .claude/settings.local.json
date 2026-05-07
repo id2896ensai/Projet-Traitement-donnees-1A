@@ -19,7 +19,9 @@
       "Bash(grep -v \"^src\\\\\\\\\\\\\\\\Parsers\\\\\\\\\\\\\\\\Adapters\")",
       "Bash(grep -v \"^src\\\\\\\\\\\\\\\\Analysis\\\\\\\\\\\\\\\\homemade\")",
       "Bash(grep -v \"^src\\\\\\\\\\\\\\\\Analysis\\\\\\\\\\\\\\\\pandas\")",
-      "Bash(grep -v \"^src\\\\\\\\\\\\\\\\Common\")"
+      "Bash(grep -v \"^src\\\\\\\\\\\\\\\\Common\")",
+      "Bash(git rm *)",
+      "Bash(git config *)"
     ]
   }
 }

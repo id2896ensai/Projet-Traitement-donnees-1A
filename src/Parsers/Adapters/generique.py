@@ -49,12 +49,24 @@ class GenericTeamAdapter:
         self.cfg = config
 
     def adapt(self, row: pd.Series) -> dict:
-        GenericTeamAdapter._counter += 1
         col = self.cfg
+
+        # ID : depuis une colonne CSV si col_id est fourni, sinon compteur auto
+        col_id = col.get("col_id", "")
+        if col_id and col_id in row.index and pd.notna(row.get(col_id)):
+            raw = row[col_id]
+            try:
+                id_val: int | str = int(raw)
+            except (ValueError, TypeError):
+                id_val = str(raw).strip()
+        else:
+            GenericTeamAdapter._counter += 1
+            id_val = GenericTeamAdapter._counter
+
         data: dict = {
-            "id":      GenericTeamAdapter._counter,
-            "sport":   col["sport_obj"],
-            "players": [],
+            "id":        id_val,
+            "sport":     col["sport_obj"],
+            "players":   [],
             "full_name": str(row[col["col_full_name"]]).strip(),
         }
         for attr, cle in [
@@ -159,11 +171,20 @@ class GenericMatchAdapter:
     def adapt(self, row: pd.Series) -> dict | None:
         col = self.cfg
 
-        # Équipes
+        # Équipes — cherche par string, puis par int si non trouvé (IDs numériques)
+        def _lookup(raw_key: str):
+            t = self.equipes.get(raw_key)
+            if t is None:
+                try:
+                    t = self.equipes.get(int(raw_key))
+                except (ValueError, TypeError):
+                    pass
+            return t
+
         key1 = str(row.get(col["col_team1"], "")).strip()
         key2 = str(row.get(col["col_team2"], "")).strip()
-        team1 = self.equipes.get(key1)
-        team2 = self.equipes.get(key2)
+        team1 = _lookup(key1)
+        team2 = _lookup(key2)
         if team1 is None or team2 is None:
             return None  # paire non trouvée → ligne ignorée
 
