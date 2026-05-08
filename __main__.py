@@ -864,7 +864,7 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
     # ── CSV Équipes ───────────────────────────────────────────
     print("\n  -- Fichier equipes --")
     while True:
-        team_src = input("  Chemin complet du fichier CSV equipes : ").strip()
+        team_src = input("  Chemin complet du fichier CSV equipes (ou joueurs si sport individuel): ").strip()
         if not team_src:
             print("  Abandon.")
             return
@@ -1689,11 +1689,11 @@ def menu_sport(sport_nom: str) -> None:
         print(
             f"  {len(teams)} equipes  |  {len(players)} joueurs  |  {len(matches)} matchs\n"
         )
-        print("---- Sur quelle catégorie souhaitez-vous travailler ? ----")
+        print("---- Sur quelle catégorie souhaitez-vous travailler ? ---- \n")
         print("  1. Joueurs")
         print("  2. Matchs")
         print("  3. Equipes")
-        print("  4. Filtrer et extraire")  
+        print("  4. Filtrer et extraire des données")
         print("  0. Retour")
 
         choix = input("\n> ").strip()
@@ -1738,7 +1738,7 @@ def main() -> None:
         sports = _liste_sports()
         role_str = ("ADMIN" if is_admin else login) if login else "utilisateur"
         print("=" * 56)
-        print(f"  APPLICATION SPORTIVES  [{role_str}]")
+        print(f"  APPLICATION SPORTIVE  [{role_str}]")
         print("=" * 56)
         print("\nChoisissez un sport :\n")
         for i, nom in enumerate(sports, 1):
