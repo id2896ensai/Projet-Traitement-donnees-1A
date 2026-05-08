@@ -12,7 +12,6 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from Analysis.visualisation import (
     plot_podium,
     plot_bilan_equipe,
-    plot_gagnants_par_saison,
     plot_summary_tableau,
 )
 from Analysis.filtrage import (
@@ -657,6 +656,7 @@ def menu_victoires_equipe(matches: list[Match]) -> None:
         print(f"    Matchs joues : {nb_total}")
         print(f"    Victoires    : {nb_v}")
         print(f"    Autres       : {nb_total - nb_v}")
+    plot_bilan_equipe(matches, nom_resolu)    
 
     _pause()
 
@@ -691,7 +691,6 @@ def menu_stats_descriptives(matches: list[Match]) -> None:
     print(f"    Moy. pts encaisses   : {stats['moy_pts_encaisses']}")
     print(f"    Meilleur score       : {stats['max_score']}")
     print(f"    Pire score           : {stats['min_score']}")
-    plot_bilan_equipe(matches, nom_resolu)
 
     _pause()
 
@@ -1452,10 +1451,9 @@ def _submenu_matchs(
         print(f"  MATCHS  ——  {sport_nom}\n")
         print("  1. Tous les matchs")
         print("  2. Podium (top 3 par victoires)")
-        print("  3. Timeline gagnants par saison")
-        print("  4. Tableau classement general")
+        print("  3. Tableau classement general")
         if sport_nom == "Tennis":
-            print("  5. Tournois et surfaces")
+            print("  4. Tournois et surfaces")
         print("  0. Retour")
         c = input("\n> ").strip()
         if c == "1":
@@ -1468,10 +1466,8 @@ def _submenu_matchs(
         elif c == "2":
             menu_podium(matches, sport_nom)
         elif c == "3":
-            plot_gagnants_par_saison(matches, sport_nom)
-        elif c == "4":
             plot_summary_tableau(matches, sport_nom)
-        elif c == "5" and sport_nom == "Tennis":
+        elif c == "4" and sport_nom == "Tennis":
             menu_tournois_tennis(cfg, teams)
         elif c == "0":
             break
