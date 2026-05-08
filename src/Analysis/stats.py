@@ -72,11 +72,11 @@ def matchs_joueur(matches: list, query: str, _prenom: str = "") -> list:
         q_alt = ""
 
     def _correspond(p) -> bool:
-        nom_p    = (p.nom or "").lower()
+        nom_p = (p.nom or "").lower()
         prenom_p = (p.prenom or "").lower()
         pseudo_p = (getattr(p, "pseudo", None) or "").lower()
-        plein    = f"{prenom_p} {nom_p}".strip()
-        plein2   = f"{nom_p} {prenom_p}".strip()
+        plein = f"{prenom_p} {nom_p}".strip()
+        plein2 = f"{nom_p} {prenom_p}".strip()
         return (
             q in nom_p or q in prenom_p or q in pseudo_p
             or q in plein or q in plein2

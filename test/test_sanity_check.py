@@ -12,7 +12,7 @@ from Model.classement import Classement
 from Model.competition import Competition
 
 
-# ---- helpers ----
+# Helpers
 
 def _sport() -> Sport:
     return Sport("Football", "ballon", 11, "Sport collectif", True)
@@ -32,8 +32,7 @@ def _team(id: int = 1) -> Team:
     return Team(id=id, sport=s, players=[], full_name="PSG", abbreviation="PSG")
 
 
-# ---- Sport ----
-
+# Sport
 def test_sport_exists() -> None:
     s = _sport()
     assert s.nom == "Football"
@@ -53,7 +52,7 @@ def test_sport_str_repr() -> None:
     assert "Sport(" in repr(s)
 
 
-# ---- Person ----
+# Person
 
 def test_person_exists() -> None:
     p = Person("Dupont", "Antoine", datetime.date(1991, 7, 11))
@@ -65,7 +64,7 @@ def test_person_invalid_date() -> None:
         Person("Dupont", "Antoine", "1991-07-11")  # type: ignore[arg-type]
 
 
-# ---- Player ----
+# Player
 
 def test_player_exists() -> None:
     p = _player()
@@ -88,7 +87,7 @@ def test_player_str_repr() -> None:
     assert "Player(" in repr(p)
 
 
-# ---- Team ----
+# Team
 
 def test_team_exists() -> None:
     t = _team()
@@ -109,7 +108,7 @@ def test_team_str_repr() -> None:
     assert "Team(" in repr(t)
 
 
-# ---- Match ----
+# Match
 
 def test_match_exists() -> None:
     s = _sport()
@@ -142,7 +141,7 @@ def test_match_str_repr() -> None:
     assert "Match(" in repr(m)
 
 
-# ---- Competition ----
+# Competition
 
 def test_competition_exists() -> None:
     c = Competition(
@@ -155,7 +154,7 @@ def test_competition_exists() -> None:
     assert c.nom == "Coupe du Monde"
 
 
-# ---- Classement ----
+# Classement
 
 def test_classement_exists() -> None:
     c = Competition(
@@ -170,7 +169,7 @@ def test_classement_exists() -> None:
     assert cl.trier()[0][1] == 10
 
 
-# ---- Vérification structure (méthodes publiques) ----
+# Vérification structure (méthodes publiques)
 
 def test_sport_has_required_methods() -> None:
     assert hasattr(Sport, "__eq__")

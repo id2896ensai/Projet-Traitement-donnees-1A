@@ -23,8 +23,8 @@ class Player(Person):
         if not prenom.strip():
             raise ValueError("prenom ne peut pas être vide")
 
-        #if date_de_naissance is not None and not isinstance(date_de_naissance, (str, type(None))):
-            #raise TypeError("date_de_naissance doit être une str ou None")
+        # if date_de_naissance is not None and not isinstance(date_de_naissance, (str, type(None))):
+            # raise TypeError("date_de_naissance doit être une str ou None")
 
         if pays_de_naissance is not None and not isinstance(pays_de_naissance, str):
             raise TypeError("pays_de_naissance doit être une str ou None")

@@ -13,7 +13,8 @@ class FootballPlayerAdapter:
 
     Colonnes CSV : player_api_id, player_name, birthday, weight (kg), height (cm)
 
-    Le nom complet est séparé sur le premier espace : "Aaron Cresswell" → prenom="Aaron", nom="Cresswell".
+    Le nom complet est séparé sur le premier espace : "Aaron Cresswell"
+    -> prenom="Aaron", nom="Cresswell".
     """
 
     @staticmethod

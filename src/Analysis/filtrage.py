@@ -71,7 +71,6 @@ def matchs_vers_dataframe(matches: list[Match]) -> pd.DataFrame:
             "date":  m.date_match,
             "sport": m.sport.nom,
         }
-        # participants et scores sont alignés via la liste
         for i, p in enumerate(m.participants, start=1):
             row[f"participant_{i}"] = p.full_name if hasattr(p, "full_name") else str(p)
             row[f"score_{i}"] = m.scores.get(p, "")

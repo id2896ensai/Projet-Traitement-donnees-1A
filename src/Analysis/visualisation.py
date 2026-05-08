@@ -9,17 +9,9 @@ Fonctions disponibles
 """
 
 import datetime
-from collections import defaultdict
-
 import plotly.graph_objects as go
-import plotly.express as px
-
 from .stats import podium, stats_descriptives
 
-
-# ══════════════════════════════════════════════════════════════════
-# Helpers internes
-# ══════════════════════════════════════════════════════════════════
 
 def _vainqueur_match(match):
     """Retourne le participant gagnant d'un match, ou None si nul."""
@@ -34,10 +26,8 @@ def _to_date(d):
         return d.date()
     return d
 
-
-# ══════════════════════════════════════════════════════════════════
 # 1. Podium — barres horizontales
-# ══════════════════════════════════════════════════════════════════
+
 
 def plot_podium(matches: list, sport_nom: str = "", n: int = 10) -> None:
     """Classement horizontal des n meilleures équipes par victoires."""
@@ -83,9 +73,7 @@ def plot_podium(matches: list, sport_nom: str = "", n: int = 10) -> None:
     fig.show()
 
 
-# ══════════════════════════════════════════════════════════════════
 # 2. Bilan équipe — camembert V/D/N
-# ══════════════════════════════════════════════════════════════════
 
 def plot_bilan_equipe(matches: list, nom_equipe: str, sport_nom: str = "") -> None:
     """Camembert Victoires / Défaites / Nuls pour une équipe."""
@@ -135,82 +123,8 @@ def plot_bilan_equipe(matches: list, nom_equipe: str, sport_nom: str = "") -> No
     fig.show()
 
 
-# ══════════════════════════════════════════════════════════════════
-# 3. Timeline gagnants — un point par victoire, coloré par équipe
-# ══════════════════════════════════════════════════════════════════
-
-def plot_gagnants_par_saison(matches: list, sport_nom: str = "") -> None:
-    """
-    Timeline horizontale : chaque victoire = un point coloré.
-    Axe X = date du match  |  Axe Y = équipe gagnante
-    Les équipes sont triées du bas (moins de victoires) vers le haut (plus).
-    """
-    points = []
-    for m in matches:
-        date = getattr(m, "date_match", None)
-        if date is None:
-            continue
-        gagnant = _vainqueur_match(m)
-        if gagnant is None:
-            continue
-        points.append((_to_date(date), gagnant.full_name))
-
-    if not points:
-        print("  Pas de données exploitables pour la timeline.")
-        return
-
-    compte = defaultdict(int)
-    for _, g in points:
-        compte[g] += 1
-
-    equipes_triees = sorted(compte.keys(), key=lambda e: compte[e])
-    y_pos = {eq: i for i, eq in enumerate(equipes_triees)}
-
-    couleurs = px.colors.qualitative.Plotly
-    couleur_eq = {
-        eq: couleurs[i % len(couleurs)]
-        for i, eq in enumerate(equipes_triees)
-    }
-
-    fig = go.Figure()
-    for eq in equipes_triees:
-        dates_eq = [p[0] for p in points if p[1] == eq]
-        ys_eq = [y_pos[eq]] * len(dates_eq)
-        fig.add_trace(go.Scatter(
-            x=dates_eq,
-            y=ys_eq,
-            mode="markers",
-            name=f"{eq} ({compte[eq]})",
-            marker=dict(color=couleur_eq[eq], size=7, opacity=0.8),
-            hovertemplate=f"<b>{eq}</b><br>Date : %{{x}}<extra></extra>",
-        ))
-
-    titre = "Gagnants par match — timeline"
-    if sport_nom:
-        titre += f"  |  {sport_nom}"
-
-    fig.update_layout(
-        title=dict(text=titre, font=dict(size=16, color="#2C3E50")),
-        xaxis_title="Date",
-        yaxis=dict(
-            tickmode="array",
-            tickvals=list(range(len(equipes_triees))),
-            ticktext=[f"{eq}  ({compte[eq]})" for eq in equipes_triees],
-            tickfont=dict(size=9),
-        ),
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        height=max(500, len(equipes_triees) * 25),
-        xaxis=dict(gridcolor="#ebebeb"),
-        margin=dict(l=20, r=200, t=60, b=60),
-        legend=dict(font=dict(size=8)),
-    )
-    fig.show()
-
-
-# ══════════════════════════════════════════════════════════════════
 # 4. Tableau summary — classement général stylé
-# ══════════════════════════════════════════════════════════════════
+
 
 def plot_summary_tableau(matches: list, sport_nom: str = "", top_n: int = 15) -> None:
     """
@@ -263,7 +177,6 @@ def plot_summary_tableau(matches: list, sport_nom: str = "", top_n: int = 15) ->
     moy_moins = [f"{r['Moy −']:.1f}" for r in lignes]
     net_vals = [f"{r['Net']:+.1f}" for r in lignes]
 
-    # Couleurs colonne %V (RdYlGn)
     pct_raw = [r["%V"] for r in lignes]
     pct_min, pct_max = min(pct_raw), max(pct_raw)
     pct_colors = [
@@ -272,14 +185,12 @@ def plot_summary_tableau(matches: list, sport_nom: str = "", top_n: int = 15) ->
         for v in pct_raw
     ]
 
-    # Couleurs colonne Net (rouge si négatif, bleu si positif)
     net_raw = [r["Net"] for r in lignes]
     net_colors = [
         "rgba(52, 152, 219, 0.6)" if v >= 0 else "rgba(231, 76, 60, 0.6)"
         for v in net_raw
     ]
 
-    # Couleurs colonne rang (médailles)
     rang_colors = [MEDAILLES.get(i, "#F8F9FA") for i in range(len(lignes))]
     row_colors = ["#F8F9FA" if i % 2 == 0 else "#FFFFFF" for i in range(len(lignes))]
 

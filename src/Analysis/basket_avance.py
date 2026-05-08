@@ -31,12 +31,10 @@ def _reshape(df: pd.DataFrame) -> pd.DataFrame:
     home_cols = {s: f"{s}_home" for s in _STATS}
     away_cols = {s: f"{s}_away" for s in _STATS}
 
-    home = df[["team_id_home", "team_id_away", "game_date"] +
-               list(home_cols.values())].copy()
+    home = df[["team_id_home", "team_id_away", "game_date"] + list(home_cols.values())].copy()
     home.columns = ["team_id", "opp_id", "game_date"] + _STATS  # type: ignore[assignment]
 
-    away = df[["team_id_away", "team_id_home", "game_date"] +
-               list(away_cols.values())].copy()
+    away = df[["team_id_away", "team_id_home", "game_date"] + list(away_cols.values())].copy()
     away.columns = ["team_id", "opp_id", "game_date"] + _STATS  # type: ignore[assignment]
 
     return pd.concat([home, away], ignore_index=True)
@@ -89,7 +87,7 @@ def calculer_stats_basket(game_csv: str, team_csv: str) -> pd.DataFrame:
     df["ast_tov"] = df["ast"] / df["tov"].replace(0, np.nan)
 
     # Possessions (propres et adversaire)
-    df["poss"]     = df["fga"] - df["oreb"] + df["tov"] + 0.44 * df["fta"]
+    df["poss"] = df["fga"] - df["oreb"] + df["tov"] + 0.44 * df["fta"]
     df["poss_opp"] = (df["fga_opp"] - df["oreb_opp"]
                       + df["tov_opp"] + 0.44 * df["fta_opp"])
 
@@ -107,10 +105,10 @@ def calculer_stats_basket(game_csv: str, team_csv: str) -> pd.DataFrame:
     df["pace"] = 48 * total_poss / (2 * n * 240).replace(0, np.nan)
 
     # Four Factors
-    df["efg_f"]   = df["efg_pct"]
+    df["efg_f"] = df["efg_pct"]
     df["tov_pct"] = df["tov"] / (df["fga"] + 0.44 * df["fta"] + df["tov"]).replace(0, np.nan)
-    df["oreb_f"]  = df["oreb_pct"]
-    df["ftr"]     = df["fta"] / df["fga"].replace(0, np.nan)
+    df["oreb_f"] = df["oreb_pct"]
+    df["ftr"] = df["fta"] / df["fga"].replace(0, np.nan)
 
     # Jointure noms d'équipes
     teams_df["id"] = teams_df["id"].astype(df["team_id"].dtype)

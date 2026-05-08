@@ -6,9 +6,6 @@ import datetime
 import pandas as pd
 from pathlib import Path
 from typing import Any
-
-sys.path.insert(0, str(Path(__file__).parent / "src"))
-
 from Analysis.visualisation import (
     plot_podium,
     plot_bilan_equipe,
@@ -22,7 +19,6 @@ from Analysis.filtrage import (
     filtrer_joueurs,
     joueurs_vers_dataframe,
 )
-
 from Parsers.Loaders.genericloaders import (  # noqa: E402
     GenericTeamLoader,
     GenericPlayerLoader,
@@ -39,6 +35,9 @@ from Analysis.stats import (  # noqa: E402
 from Analysis.basket_avance import calculer_stats_basket  # noqa: E402
 from Model.match import Match  # noqa: E402
 from Model.team import Team  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 
 SEP = "-" * 56
 _PROJECT_ROOT = Path(__file__).parent
@@ -656,7 +655,7 @@ def menu_victoires_equipe(matches: list[Match]) -> None:
         print(f"    Matchs joues : {nb_total}")
         print(f"    Victoires    : {nb_v}")
         print(f"    Autres       : {nb_total - nb_v}")
-    plot_bilan_equipe(matches, nom_resolu)    
+    plot_bilan_equipe(matches, nom_resolu)
 
     _pause()
 
@@ -864,7 +863,9 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
     # ── CSV Équipes ───────────────────────────────────────────
     print("\n  -- Fichier equipes --")
     while True:
-        team_src = input("  Chemin complet du fichier CSV equipes (ou joueurs si sport individuel): ").strip()
+        team_src = input(
+            "  Chemin complet du fichier CSV equipes (ou joueurs si sport individuel): "
+            ).strip()
         if not team_src:
             print("  Abandon.")
             return
@@ -1614,7 +1615,9 @@ def _filtrer_et_afficher(
     print()
     if input("  Exporter en CSV ? (o/n) : ").strip().lower() == "o":
         file = input("  Nom du fichier (ex: export.csv) : ").strip()
-        chemin = input(r"  Chemin complet du fichier à sauvegarder (ex: C:\Users\Moi\Documents) : ").strip()
+        chemin = input(
+            r"  Chemin complet du fichier à sauvegarder (ex: C:\Users\Moi\Documents) : "
+            ).strip()
         if not file.endswith(".csv"):
             file += ".csv"
         chemin_complet = os.path.join(chemin, file)

@@ -38,7 +38,7 @@ import pandas as pd
 _DATE_INCONNUE = datetime.date(1900, 1, 1)
 
 
-# ─── Adaptateur Équipe ───────────────────────────────────────
+# Adaptateur Équipe
 
 class GenericTeamAdapter:
     """Adaptateur d'équipe piloté par une config de colonnes."""
@@ -83,7 +83,7 @@ class GenericTeamAdapter:
         return data
 
 
-# ─── Adaptateur Joueur ────────────────────────────────────────
+# Adaptateur Joueur
 
 class GenericPlayerAdapter:
     """Adaptateur de joueur piloté par une config de colonnes."""
@@ -94,8 +94,7 @@ class GenericPlayerAdapter:
     def adapt(self, row: pd.Series) -> dict:
         col = self.cfg
 
-        # Décomposition nom/prénom
-        col_nom    = col.get("col_nom", "")
+        col_nom = col.get("col_nom", "")
         col_prenom = col.get("col_prenom", "")
         col_pseudo = col.get("col_pseudo", "")
 
@@ -108,13 +107,12 @@ class GenericPlayerAdapter:
             nom_val = str(row.get(col_nom, "")).strip() or "Inconnu"
         elif col_nom and col_nom in row.index and pd.notna(row.get(col_nom)):
             parties = str(row[col_nom]).strip().split(" ", 1)
-            prenom  = parties[0] or "?"
+            prenom = parties[0] or "?"
             nom_val = parties[1] if len(parties) == 2 else "Inconnu"
         else:
-            prenom  = pseudo or "?"
+            prenom = pseudo or "?"
             nom_val = "Inconnu"
 
-        # Date de naissance
         dob = _DATE_INCONNUE
         col_dob = col.get("col_date_naissance", "")
         if col_dob and col_dob in row.index and pd.notna(row.get(col_dob)):
@@ -123,7 +121,6 @@ class GenericPlayerAdapter:
             except ValueError:
                 pass
 
-        # Taille
         taille = 0.0
         col_taille = col.get("col_taille", "")
         if col_taille and col_taille in row.index and pd.notna(row.get(col_taille)):
@@ -132,7 +129,6 @@ class GenericPlayerAdapter:
             except ValueError:
                 pass
 
-        # Pays / rôle
         pays: str | None = None
         col_pays = col.get("col_pays", "")
         if col_pays and col_pays in row.index and pd.notna(row.get(col_pays)):
@@ -159,19 +155,19 @@ class GenericPlayerAdapter:
         }
 
 
-# ─── Adaptateur Match ─────────────────────────────────────────
+# Adaptateur Match
 
 class GenericMatchAdapter:
     """Adaptateur de match piloté par une config de colonnes."""
 
     def __init__(self, equipes: dict, config: dict) -> None:
         self.equipes = equipes
-        self.cfg     = config
+        self.cfg = config
 
     def adapt(self, row: pd.Series) -> dict | None:
         col = self.cfg
 
-        # Équipes — cherche par string, puis par int si non trouvé (IDs numériques)
+        # Cherche par string, puis par int si non trouvé (IDs numériques)
         def _lookup(raw_key: str):
             t = self.equipes.get(raw_key)
             if t is None:
@@ -188,14 +184,12 @@ class GenericMatchAdapter:
         if team1 is None or team2 is None:
             return None  # paire non trouvée → ligne ignorée
 
-        # Scores
         try:
             s1 = float(row[col["col_score1"]])
             s2 = float(row[col["col_score2"]])
         except (ValueError, TypeError, KeyError):
             return None
 
-        # Date
         try:
             date_str = str(row.get(col["col_date"], ""))[:10]
             date = datetime.date.fromisoformat(date_str)

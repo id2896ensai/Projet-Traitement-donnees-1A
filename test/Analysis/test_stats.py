@@ -16,7 +16,7 @@ from Analysis.stats import (
 )
 
 
-# ── Helpers ───────────────────────────────────────────────────
+# Helpers
 
 
 class FakeTeam:
@@ -52,7 +52,7 @@ def _match(t1, s1: float, t2, s2: float):
     return FakeMatch(t1, s1, t2, s2)
 
 
-# ── Fixtures ──────────────────────────────────────────────────
+# Fixtures
 
 
 @pytest.fixture
@@ -80,7 +80,7 @@ def trois_matchs(psg, om, lyon):
     ]
 
 
-# ── podium ────────────────────────────────────────────────────
+# Podium
 
 
 def test_podium_ordre_decroissant(trois_matchs, psg, om):
@@ -106,7 +106,7 @@ def test_podium_liste_vide():
     assert podium([]) == []
 
 
-# ── victoires_equipe ──────────────────────────────────────────
+# victoires_equipe
 
 
 def test_victoires_equipe_compte_correct(trois_matchs):
@@ -131,7 +131,7 @@ def test_victoires_equipe_avec_nul():
     assert victoires_equipe(matchs, "OM") == 0
 
 
-# ── matchs_equipe ─────────────────────────────────────────────
+# matchs_equipe
 
 
 def test_matchs_equipe_retourne_bons_matchs(trois_matchs):
@@ -151,8 +151,7 @@ def test_matchs_equipe_liste_vide():
     assert matchs_equipe([], "PSG") == []
 
 
-# ── matchs_joueur ─────────────────────────────────────────────
-
+# matchs_joueur
 
 @pytest.fixture
 def equipe_avec_joueurs():
@@ -204,7 +203,7 @@ def test_matchs_joueur_par_nom_equipe(un_match):
     assert len(matchs_joueur(un_match, "PSG")) == 1
 
 
-# ── stats_descriptives ────────────────────────────────────────
+# stats_descriptives
 
 
 def test_stats_descriptives_equipe_inconnue(trois_matchs):
