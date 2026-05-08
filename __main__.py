@@ -635,7 +635,7 @@ def connexion() -> tuple[str | None, bool]:
     """Demande login/mdp. Retourne (login, is_admin) ou (None, False) si invité."""
     _clear()
     print("=" * 60)
-    print("   Bienvenue dans l'application de statistiques sportives !")
+    print("   Bienvenue dans l'application de visualisation de compétitions sportives !")
     print("=" * 60)
     print()
     print("  Consultez les résultats et statistiques de vos sports")
