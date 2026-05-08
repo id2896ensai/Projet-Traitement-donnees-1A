@@ -25,10 +25,10 @@ class ChessTeamAdapter:
         ChessTeamAdapter._counter += 1
 
         full_name = str(row["name"]).strip() if pd.notna(row.get("name")) else f"Joueur_{ChessTeamAdapter._counter}"
-        # Format CSV : "NOM, Prenom" ou juste "NOM"
-        parties = full_name.split(", ", 1)
-        nom = parties[0]
-        prenom = parties[1] if len(parties) == 2 else "X"
+        # Format CSV après nettoyage : "Prenom Nom" (premier mot = prénom, reste = nom)
+        parties = full_name.split(" ", 1)
+        prenom = parties[0]
+        nom = parties[1] if len(parties) == 2 else "?"
 
         fide_id = int(row["fide_id"]) if pd.notna(row.get("fide_id")) else ChessTeamAdapter._counter
 

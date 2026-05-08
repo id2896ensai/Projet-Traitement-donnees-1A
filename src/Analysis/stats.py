@@ -52,27 +52,44 @@ def matchs_equipe(matches: list, nom_equipe: str) -> list:
     return resultat
 
 
-def matchs_joueur(matches: list, nom: str, prenom: str) -> list:
+def matchs_joueur(matches: list, query: str, _prenom: str = "") -> list:
     """
-    Matchs impliquant un joueur cherché par nom et prénom.
-    - Sports individuels : le joueur est l'unique joueur de la team (team.players[0]).
-    - Sports collectifs  : cherche dans team.players de chaque équipe.
+    Matchs impliquant un joueur dont le nom correspond à la requête.
+
+    query peut être :
+      - un nom complet  "Gurel Ediz"
+      - un prénom seul  "Gurel"
+      - un nom seul     "Ediz"
+      - une partie du nom (recherche partielle insensible à la casse)
+
+    _prenom est conservé pour compatibilité ascendante (ignoré si query suffit).
     """
-    nom_lower = nom.lower()
-    prenom_lower = prenom.lower()
-    resultat = []
-    for m in matches:
-        trouve = False
-        for team in m.participants:
-            for p in team.players:
-                if p.nom.lower() == nom_lower and p.prenom.lower() == prenom_lower:
-                    trouve = True
-                    break
-            if trouve:
-                break
-        if trouve:
-            resultat.append(m)
-    return resultat
+    q = query.strip().lower()
+    # Si l'appelant a passé nom+prenom séparément, on les combine
+    if _prenom:
+        q_alt = (_prenom + " " + query).strip().lower()
+    else:
+        q_alt = ""
+
+    def _correspond(p) -> bool:
+        nom_p    = (p.nom or "").lower()
+        prenom_p = (p.prenom or "").lower()
+        pseudo_p = (getattr(p, "pseudo", None) or "").lower()
+        plein    = f"{prenom_p} {nom_p}".strip()
+        plein2   = f"{nom_p} {prenom_p}".strip()
+        return (
+            q in nom_p or q in prenom_p or q in pseudo_p
+            or q in plein or q in plein2
+            or (q_alt and (q_alt in plein or q_alt in plein2))
+        )
+
+    def _team_correspond(team) -> bool:
+        full = (getattr(team, "full_name", None) or "").lower()
+        if q in full or (q_alt and q_alt in full):
+            return True
+        return any(_correspond(p) for p in team.players)
+
+    return [m for m in matches if any(_team_correspond(t) for t in m.participants)]
 
 
 def stats_descriptives(matches: list, nom_equipe: str) -> dict:

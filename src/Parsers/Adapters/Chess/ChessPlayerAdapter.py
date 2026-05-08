@@ -23,9 +23,10 @@ class ChessPlayerAdapter:
     @staticmethod
     def adapt(row: pd.Series) -> dict:
         raw_name = str(row["name"]).strip()
-        parts = raw_name.split(", ", 1)
-        nom = parts[0]
-        prenom = parts[1] if len(parts) == 2 else "Inconnu"
+        # Format après nettoyage : "Prenom Nom" (premier mot = prénom, reste = nom)
+        parts = raw_name.split(" ", 1)
+        prenom = parts[0]
+        nom = parts[1] if len(parts) == 2 else "?"
 
         birth_year = row.get("birth_year")
         try:

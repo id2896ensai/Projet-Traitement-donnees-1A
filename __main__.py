@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 import shutil
@@ -47,6 +48,10 @@ _ADMINS: set[str] = {"admin"}
 
 # Fichier JSON de persistance des sports personnalisés
 _CUSTOM_SPORTS_FILE = Path(__file__).parent / "sports_custom.json"
+
+
+def _clear() -> None:
+    os.system("cls" if os.name == "nt" else "clear")
 
 
 def _pause() -> None:
@@ -536,25 +541,24 @@ def menu_podium(matches: list[Match], sport_nom: str) -> None:
 
 
 def menu_matchs_joueur(matches: list[Match]) -> None:
-    """Recherche des matchs pour un joueur donné (nom + prénom)."""
+    """Recherche des matchs pour un joueur (nom complet ou partie du nom)."""
     print(SEP)
-    nom = input("  Nom du joueur    : ").strip()
-    prenom = input("  Prenom du joueur : ").strip()
+    query = input("  Nom du joueur (ou partie du nom) : ").strip()
 
-    if not nom or not prenom:
-        print("Nom et prenom requis.")
+    if not query:
+        print("  Recherche vide.")
         _pause()
         return
 
-    trouves = matchs_joueur(matches, nom, prenom)
+    trouves = matchs_joueur(matches, query)
 
     if not trouves:
-        print(f"\nAucun match trouve pour {prenom} {nom}.")
+        print(f"\n  Aucun match trouve pour '{query}'.")
         _pause()
         return
 
     trouves.sort(key=lambda m: m.date_match)
-    print(f"\n{len(trouves)} match(s) pour {prenom} {nom} :\n")
+    print(f"\n  {len(trouves)} match(s) pour '{query}' :\n")
     for m in trouves:
         p1, p2 = m.participants[0], m.participants[1]
         s1, s2 = m.scores[p1], m.scores[p2]
@@ -629,19 +633,30 @@ def menu_stats_descriptives(matches: list[Match]) -> None:
 
 def connexion() -> tuple[str | None, bool]:
     """Demande login/mdp. Retourne (login, is_admin) ou (None, False) si invité."""
-    print("\n" + SEP)
-    print("CONNEXION  (Entree pour continuer en invite)")
-    login = input("  Login       : ").strip()
+    _clear()
+    print("=" * 60)
+    print("   Bienvenue dans l'application de statistiques sportives !")
+    print("=" * 60)
+    print()
+    print("  Consultez les résultats et statistiques de vos sports")
+    print("  favoris : basketball, football, tennis, échecs et plus.")
+    print()
+    print("  Connectez-vous en tant qu'administrateur avec votre")
+    print("  login et mot de passe, ou appuyez sur Entrée pour")
+    print("  continuer en tant qu'utilisateur (consultation libre).")
+    print()
+    print("-" * 60)
+    login = input("  Login (Entrée pour continuer) : ").strip()
     if not login:
-        print("  Connexion en tant qu'invite (lecture seule).")
+        print("  Connexion en tant qu'utilisateur (lecture seule).")
         return None, False
-    mdp = input("  Mot de passe: ").strip()
+    mdp = input("  Mot de passe                  : ").strip()
     if _UTILISATEURS.get(login) == mdp:
         is_admin = login in _ADMINS
         role = "ADMINISTRATEUR" if is_admin else "utilisateur"
         print(f"  Bienvenue {login} ({role}).")
         return login, is_admin
-    print("  Identifiants incorrects. Connexion en invite.")
+    print("  Identifiants incorrects. Connexion en tant qu'utilisateur.")
     return None, False
 
 
@@ -776,11 +791,15 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
 
     # ── CSV Équipes ───────────────────────────────────────────
     print("\n  -- Fichier equipes --")
-    team_src = input("  Chemin complet du fichier CSV equipes : ").strip()
-    cols = _lire_colonnes(team_src)
-    if not cols:
-        print("  Fichier invalide, abandon.")
-        return
+    while True:
+        team_src = input("  Chemin complet du fichier CSV equipes : ").strip()
+        if not team_src:
+            print("  Abandon.")
+            return
+        cols = _lire_colonnes(team_src)
+        if cols:
+            break
+        print("  Fichier introuvable ou illisible. Retapez le chemin (Entree=annuler) :")
     print(f"  Colonnes detectees : {', '.join(cols)}")
     cfg["col_full_name"]    = _demander_col(cols, "Colonne NOM d'equipe (obligatoire)")
     cfg["col_abbreviation"] = _demander_col(cols, "Colonne abreviation      (Entree=ignorer)", False)
@@ -794,7 +813,7 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
     col_id = _demander_col(cols, "Colonne ID equipe dans team.csv (Entree=ignorer)", False)
     if col_id:
         cfg["col_id"]   = col_id
-        cfg["team_key"] = "id"   # load_as_dict utilisera Team.id = valeur de col_id
+        cfg["team_key"] = "id"
     else:
         default_key = cfg.get("col_abbreviation") or cfg["col_full_name"]
         rep = input(f"  Colonne cle pour les noms [{default_key}] : ").strip()
@@ -804,8 +823,10 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
 
     # ── CSV Joueurs (optionnel) ───────────────────────────────
     print("\n  -- Fichier joueurs (optionnel) --")
-    player_src = input("  Chemin complet (Entree=ignorer) : ").strip()
-    if player_src:
+    while True:
+        player_src = input("  Chemin complet (Entree=ignorer) : ").strip()
+        if not player_src:
+            break
         pcols = _lire_colonnes(player_src)
         if pcols:
             print(f"  Colonnes detectees : {', '.join(pcols)}")
@@ -817,14 +838,20 @@ def admin_ajouter_sport(sports_custom: dict) -> None:
             cfg["col_date_naissance"] = _demander_col(pcols, "Colonne date naissance   (Entree=ignorer)", False)
             cfg["col_taille"]         = _demander_col(pcols, "Colonne taille cm        (Entree=ignorer)", False)
             cfg["player_csv"] = _copier_csv(player_src, slug, "player.csv")
+            break
+        print("  Fichier introuvable ou illisible. Retapez le chemin (Entree=ignorer) :")
 
     # ── CSV Matchs ────────────────────────────────────────────
     print("\n  -- Fichier matchs --")
-    match_src = input("  Chemin complet du fichier CSV matchs : ").strip()
-    mcols = _lire_colonnes(match_src)
-    if not mcols:
-        print("  Fichier invalide, abandon.")
-        return
+    while True:
+        match_src = input("  Chemin complet du fichier CSV matchs : ").strip()
+        if not match_src:
+            print("  Abandon.")
+            return
+        mcols = _lire_colonnes(match_src)
+        if mcols:
+            break
+        print("  Fichier introuvable ou illisible. Retapez le chemin (Entree=annuler) :")
     print(f"  Colonnes detectees : {', '.join(mcols)}")
     cfg["col_team1"]  = _demander_col(mcols, "Colonne equipe/joueur 1  (obligatoire)")
     cfg["col_team2"]  = _demander_col(mcols, "Colonne equipe/joueur 2  (obligatoire)")
@@ -1201,7 +1228,8 @@ def menu_stats_avancees_basket(cfg: dict, matches: list[Match]) -> None:
 def menu_admin(sports_custom: dict) -> None:
     """Menu réservé à l'administrateur."""
     while True:
-        print("\n" + SEP)
+        _clear()
+        print(SEP)
         print("MENU ADMINISTRATEUR\n")
         print("  1. Ajouter un nouveau sport (wizard CSV)")
         print("  2. Supprimer un sport personnalise")
@@ -1231,6 +1259,93 @@ def menu_admin(sports_custom: dict) -> None:
             print("Choix invalide.")
 
 
+# ─── Sous-menus par bloc ──────────────────────────────────────
+
+def _submenu_joueurs(sport_nom: str, players: list[Any], matches: list[Match]) -> None:
+    while True:
+        _clear()
+        print(SEP)
+        print(f"  JOUEURS  ——  {sport_nom}\n")
+        print("  1. Fiche d'un joueur")
+        print("  2. Matchs d'un joueur")
+        print("  0. Retour")
+        c = input("\n> ").strip()
+        if c == "1":
+            menu_info_joueur(sport_nom, players)
+        elif c == "2":
+            menu_matchs_joueur(matches)
+        elif c == "0":
+            break
+        else:
+            print("  Choix invalide.")
+
+
+def _submenu_matchs(sport_nom: str, cfg: dict, matches: list[Match], teams: list[Team]) -> None:
+    while True:
+        _clear()
+        print(SEP)
+        print(f"  MATCHS  ——  {sport_nom}\n")
+        print("  1. Tous les matchs")
+        print("  2. Podium (top 3 par victoires)")
+        print("  3. Timeline gagnants par saison")
+        print("  4. Tableau classement general")
+        if sport_nom == "Tennis":
+            print("  5. Tournois et surfaces")
+        print("  0. Retour")
+        c = input("\n> ").strip()
+        if c == "1":
+            if sport_nom == "Badminton":
+                menu_matchs_badminton(cfg)
+            elif sport_nom == "Football (Champions League)":
+                menu_matchs_footballcl(cfg)
+            else:
+                menu_matchs(matches)
+        elif c == "2":
+            menu_podium(matches, sport_nom)
+        elif c == "3":
+            plot_gagnants_par_saison(matches, sport_nom)
+        elif c == "4":
+            plot_summary_tableau(matches, sport_nom)
+        elif c == "5" and sport_nom == "Tennis":
+            menu_tournois_tennis(cfg, teams)
+        elif c == "0":
+            break
+        else:
+            print("  Choix invalide.")
+
+
+def _submenu_equipes(sport_nom: str, cfg: dict, teams: list[Team],
+                     matches: list[Match], collectif: bool, a_coaches: bool) -> None:
+    while True:
+        _clear()
+        print(SEP)
+        print(f"  EQUIPES  ——  {sport_nom}\n")
+        print("  1. Fiche d'une equipe")
+        print("  2. Victoires d'une equipe")
+        if collectif:
+            print("  3. Stats descriptives")
+        if sport_nom == "Basketball":
+            print("  4. Stats avancees (eFG%, TS%, NetRtg, dashboard)")
+        if a_coaches:
+            print("  5. Coaches")
+        print("  0. Retour")
+        c = input("\n> ").strip()
+        if c == "1":
+            menu_info_equipe(sport_nom, teams)
+        elif c == "2":
+            menu_victoires_equipe(matches)
+        elif c == "3" and collectif:
+            menu_stats_descriptives(matches)
+        elif c == "4" and sport_nom == "Basketball":
+            menu_stats_avancees_basket(cfg, matches)
+        elif c == "5" and a_coaches:
+            menu_info_coach(sport_nom, cfg)
+        elif c == "0":
+            break
+        else:
+            print("  Choix invalide.")
+
+
 # ─── Menu principal d'un sport ────────────────────────────────
 
 def menu_sport(sport_nom: str) -> None:
@@ -1241,64 +1356,28 @@ def menu_sport(sport_nom: str) -> None:
 
     print(f"\nChargement de {sport_nom}...")
     teams, players, matches = charger_donnees(sport_nom)
-    print(f"\n  {len(teams)} equipes  |  {len(players)} joueurs  |  {len(matches)} matchs charges")
 
     while True:
-        print("\n" + SEP)
-        print(f"MENU  {sport_nom}\n")
-        print("  1. Afficher les matchs")
-        print("  2. Podium (top 3 par victoires)")
-        print("  3. Matchs d'un joueur (nom + prenom)")
-        print("  4. Victoires d'une equipe")
-        if collectif:
-            print("  5. Stats descriptives d'une equipe")
-        print("  6. Informations sur un joueur")
-        print("  7. Informations sur une equipe")
-        if a_coaches:
-            print("  8. Informations sur les coaches")
-        if sport_nom == "Tennis":
-            print("  9. Tournois et surfaces")
-        if sport_nom == "Basketball":
-            print("  9. Stats avancees (eFG%, TS%, NetRtg, dashboard)")
-        print("  T. Timeline gagnants par saison")
-        print("  S. Tableau summary (classement general)")
-        print("  0. Retour au menu principal")
+        _clear()
+        print(SEP)
+        print(f"  {sport_nom}")
+        print(f"  {len(teams)} equipes  |  {len(players)} joueurs  |  {len(matches)} matchs\n")
+        print("  1. Joueurs")
+        print("  2. Matchs")
+        print("  3. Equipes")
+        print("  0. Retour")
 
         choix = input("\n> ").strip()
-
         if choix == "1":
-            if sport_nom == "Badminton":
-                menu_matchs_badminton(cfg)
-            elif sport_nom == "Football (Champions League)":
-                menu_matchs_footballcl(cfg)
-            else:
-                menu_matchs(matches)
+            _submenu_joueurs(sport_nom, players, matches)
         elif choix == "2":
-            menu_podium(matches, sport_nom)
+            _submenu_matchs(sport_nom, cfg, matches, teams)
         elif choix == "3":
-            menu_matchs_joueur(matches)
-        elif choix == "4":
-            menu_victoires_equipe(matches)
-        elif choix == "5" and collectif:
-            menu_stats_descriptives(matches)
-        elif choix == "6":
-            menu_info_joueur(sport_nom, players)
-        elif choix == "7":
-            menu_info_equipe(sport_nom, teams)
-        elif choix == "8" and a_coaches:
-            menu_info_coach(sport_nom, cfg)
-        elif choix == "9" and sport_nom == "Tennis":
-            menu_tournois_tennis(cfg, teams)
-        elif choix == "9" and sport_nom == "Basketball":
-            menu_stats_avancees_basket(cfg, matches)
-        elif choix.upper() == "T":
-            plot_gagnants_par_saison(matches, sport_nom)
-        elif choix.upper() == "S":
-            plot_summary_tableau(matches, sport_nom)
+            _submenu_equipes(sport_nom, cfg, teams, matches, collectif, a_coaches)
         elif choix == "0":
             break
         else:
-            print("Choix invalide.")
+            print("  Choix invalide.")
 
 
 # ─── Menu principal ───────────────────────────────────────────
@@ -1323,10 +1402,11 @@ def main() -> None:
         return list(SPORTS_REGISTRY.keys()) + list(registre_custom.keys())
 
     while True:
+        _clear()
         sports = _liste_sports()
-        role_str = ("ADMIN" if is_admin else login) if login else "invite"
-        print("\n" + "=" * 56)
-        print(f"  APPLICATION DE STATISTIQUES SPORTIVES  [{role_str}]")
+        role_str = ("ADMIN" if is_admin else login) if login else "utilisateur"
+        print("=" * 56)
+        print(f"  APPLICATION SPORTIVES  [{role_str}]")
         print("=" * 56)
         print("\nChoisissez un sport :\n")
         for i, nom in enumerate(sports, 1):
@@ -1385,37 +1465,29 @@ def _charger_et_afficher_sport_custom(sport_nom: str, entree: dict) -> None:
             entree["match_csv"], entree["MatchAdapter"](equipes=td)
         ).load()
 
-        print(f"  {len(teams)} equipes  |  {len(players)} joueurs  |  {len(matches)} matchs")
+        collectif: bool = bool(entree.get("sport_en_equipe", False))
 
         while True:
-            print("\n" + SEP)
-            print(f"MENU  {sport_nom}\n")
-            print("  1. Afficher les matchs")
-            print("  2. Podium (top 3 par victoires)")
-            print("  3. Victoires d'une equipe")
-            if entree.get("sport_en_equipe"):
-                print("  4. Stats descriptives d'une equipe")
-            print("  5. Infos d'un joueur")
-            print("  6. Infos d'une equipe")
+            _clear()
+            print(SEP)
+            print(f"  {sport_nom}")
+            print(f"  {len(teams)} equipes  |  {len(players)} joueurs  |  {len(matches)} matchs\n")
+            print("  1. Joueurs")
+            print("  2. Matchs")
+            print("  3. Equipes")
             print("  0. Retour")
 
             c = input("\n> ").strip()
             if c == "1":
-                menu_matchs(matches)
+                _submenu_joueurs(sport_nom, players, matches)
             elif c == "2":
-                menu_podium(matches, sport_nom)
+                _submenu_matchs(sport_nom, entree, matches, teams)
             elif c == "3":
-                menu_victoires_equipe(matches)
-            elif c == "4" and entree.get("sport_en_equipe"):
-                menu_stats_descriptives(matches)
-            elif c == "5":
-                menu_info_joueur(sport_nom, players)
-            elif c == "6":
-                menu_info_equipe(sport_nom, teams)
+                _submenu_equipes(sport_nom, entree, teams, matches, collectif, False)
             elif c == "0":
                 break
             else:
-                print("Choix invalide.")
+                print("  Choix invalide.")
     except Exception as e:
         print(f"  Erreur : {e}")
         _pause()
