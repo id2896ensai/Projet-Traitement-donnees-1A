@@ -6,6 +6,9 @@ import datetime
 import pandas as pd
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 from Analysis.visualisation import (
     plot_podium,
     plot_bilan_equipe,
@@ -36,7 +39,7 @@ from Analysis.basket_avance import calculer_stats_basket  # noqa: E402
 from Model.match import Match  # noqa: E402
 from Model.team import Team  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 
 
 SEP = "-" * 56
