@@ -81,7 +81,10 @@ def charger_donnees(sport_nom: str) -> tuple[list[Team], list[Any], list[Match]]
 
     print("  Chargement des equipes...")
     team_loader = GenericTeamLoader(cfg["team_csv"], cfg["TeamAdapter"]())
-    teams: list[Team] = team_loader.load()
+    # Un seul chargement : teams_dict et teams partagent les mêmes objets Team,
+    # qui seront ensuite référencés dans les participants des Match.
+    teams_dict = team_loader.load_as_dict(cfg["team_key"])
+    teams: list[Team] = list(teams_dict.values())
 
     players: list[Any] = []
     if cfg.get("player_csv") and cfg.get("PlayerAdapter"):
@@ -90,11 +93,26 @@ def charger_donnees(sport_nom: str) -> tuple[list[Team], list[Any], list[Match]]
         players = player_loader.load()
 
     print("  Chargement des matchs...")
-    teams_dict = team_loader.load_as_dict(cfg["team_key"])
     kwarg: str = cfg["match_kwarg"]
     match_adapter = cfg["MatchAdapter"](**{kwarg: teams_dict})
     match_loader = GenericMatchLoader(cfg["match_csv"], match_adapter)
     matches: list[Match] = match_loader.load()
+
+    # Rattache les joueurs à leurs équipes pour les sports collectifs.
+    # Nécessaire pour que matchs_joueur() puisse chercher dans team.players.
+    ptc = cfg.get("player_team_col")
+    pta = cfg.get("player_team_attr")
+    if ptc and pta and players and cfg.get("player_csv"):
+        try:
+            df_p = pd.read_csv(cfg["player_csv"])
+            teams_by_attr: dict[str, Any] = {str(getattr(t, pta, "")): t for t in teams}
+            for player, (_, row) in zip(players, df_p.iterrows()):
+                team_val = str(row.get(ptc, ""))
+                team = teams_by_attr.get(team_val)
+                if team is not None:
+                    team.players.append(player)
+        except Exception:
+            pass
 
     return teams, players, matches
 
