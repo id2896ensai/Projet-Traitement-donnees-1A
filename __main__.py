@@ -1693,10 +1693,11 @@ def menu_sport(sport_nom: str) -> None:
         print(
             f"  {len(teams)} equipes  |  {len(players)} joueurs  |  {len(matches)} matchs\n"
         )
+        print("---- Sur quelle catégorie souhaitez-vous travailler ? ----")
         print("  1. Joueurs")
         print("  2. Matchs")
         print("  3. Equipes")
-        print("  4. Filtrer et extraire")  # ← ajouter
+        print("  4. Filtrer et extraire")  
         print("  0. Retour")
 
         choix = input("\n> ").strip()

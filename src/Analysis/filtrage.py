@@ -135,7 +135,7 @@ def equipes_vers_dataframe(teams: list[Team]) -> pd.DataFrame:
             "city":         getattr(t, "city", None),
             "country":      getattr(t, "country", None),
             "region":       getattr(t, "region", None),
-            "nb_players":   t.nb_players,
+            "nb_players":   len(t.players),
         })
     return pd.DataFrame(rows)
 
