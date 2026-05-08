@@ -1617,12 +1617,14 @@ def _filtrer_et_afficher(
         )
     print()
     if input("  Exporter en CSV ? (o/n) : ").strip().lower() == "o":
-        chemin = input("  Nom du fichier (ex: export.csv) : ").strip()
-        if not chemin.endswith(".csv"):
-            chemin += ".csv"
+        file = input("  Nom du fichier (ex: export.csv) : ").strip()
+        chemin = input(r"  Chemin complet du fichier à sauvegarder (ex: C:\Users\Moi\Documents) : ").strip()
+        if not file.endswith(".csv"):
+            file += ".csv"
+        chemin_complet = os.path.join(chemin, file)
         try:
-            df.to_csv(chemin, index=False, encoding="utf-8-sig")
-            print(f"  Fichier sauvegarde : {chemin}")
+            df.to_csv(chemin_complet, index=False, encoding="utf-8-sig")
+            print(f"  Fichier sauvegarde : {chemin_complet}")
         except Exception as e:
             print(f"  Erreur export : {e}")
     _pause()
