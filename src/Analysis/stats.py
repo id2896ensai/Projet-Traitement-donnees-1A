@@ -1,5 +1,6 @@
 # Fonctions d'analyse et de statistiques sur les matchs.
 from collections import defaultdict
+from typing import Any
 
 
 def _vainqueur(match):
@@ -16,7 +17,7 @@ def podium(matches: list, n: int = 3) -> list:
     Classement des n premières équipes/joueurs par nombre de victoires.
     Retourne une liste de tuples (Team, nb_victoires) triée par ordre décroissant.
     """
-    victoires = defaultdict(int)
+    victoires: defaultdict[Any, int] = defaultdict(int)
     for m in matches:
         gagnant = _vainqueur(m)
         if gagnant is not None:
@@ -77,10 +78,10 @@ def matchs_joueur(matches: list, query: str, _prenom: str = "") -> list:
         pseudo_p = (getattr(p, "pseudo", None) or "").lower()
         plein = f"{prenom_p} {nom_p}".strip()
         plein2 = f"{nom_p} {prenom_p}".strip()
-        return (
+        return bool(
             q in nom_p or q in prenom_p or q in pseudo_p
             or q in plein or q in plein2
-            or (q_alt and (q_alt in plein or q_alt in plein2))
+            or (bool(q_alt) and (q_alt in plein or q_alt in plein2))
         )
 
     def _team_correspond(team) -> bool:
