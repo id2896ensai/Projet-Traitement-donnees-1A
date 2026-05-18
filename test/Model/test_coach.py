@@ -4,10 +4,6 @@ from datetime import date
 from Model.coach import Coach
 
 
-# ══════════════════════════════════════════════════════════════════
-# Fixture
-# ══════════════════════════════════════════════════════════════════
-
 @pytest.fixture
 def coach_defaut():
     return Coach(
@@ -16,10 +12,6 @@ def coach_defaut():
         date_de_naissance=date(1970, 1, 1),
     )
 
-
-# ══════════════════════════════════════════════════════════════════
-# Tests des erreurs à l'instanciation (héritées de Person)
-# ══════════════════════════════════════════════════════════════════
 
 @pytest.mark.parametrize(
     "params, erreur, message_erreur",
@@ -56,10 +48,6 @@ def test_coach_erreurs_instanciation(params, erreur, message_erreur):
         Coach(**params)
 
 
-# ══════════════════════════════════════════════════════════════════
-# Tests des attributs après instanciation
-# ══════════════════════════════════════════════════════════════════
-
 @pytest.mark.parametrize(
     "params, attribut, valeur_attendue",
     [
@@ -84,10 +72,6 @@ def test_coach_attributs(params, attribut, valeur_attendue):
     coach = Coach(**params)
     assert getattr(coach, attribut) == valeur_attendue
 
-
-# ══════════════════════════════════════════════════════════════════
-# Tests du contenu de __str__
-# ══════════════════════════════════════════════════════════════════
 
 @pytest.mark.parametrize(
     "params, contenu_attendu",
@@ -114,10 +98,6 @@ def test_coach_str_contenu(params, contenu_attendu):
     coach = Coach(**params)
     assert contenu_attendu in str(coach)
 
-
-# ══════════════════════════════════════════════════════════════════
-# Tests du contenu de __repr__
-# ══════════════════════════════════════════════════════════════════
 
 @pytest.mark.parametrize(
     "params, contenu_attendu",
