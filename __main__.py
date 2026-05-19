@@ -1412,7 +1412,7 @@ def menu_admin(sports_custom: dict) -> None:
         _clear()
         print(SEP)
         print("MENU ADMINISTRATEUR\n")
-        print("  1. Ajouter un nouveau sport (wizard CSV)")
+        print("  1. Ajouter un nouveau sport")
         print("  2. Supprimer un sport personnalise")
         print("  3. Lister tous les sports actifs")
         print(
