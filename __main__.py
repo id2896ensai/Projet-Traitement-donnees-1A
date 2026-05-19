@@ -730,7 +730,7 @@ def connexion() -> tuple[str | None, bool]:
     print()
     print("  Connectez-vous en tant qu'administrateur avec votre")
     print("  login et mot de passe, ou appuyez sur Entrée pour")
-    print("  continuer en tant qu'utilisateur (consultation libre).")
+    print("  continuer en tant qu'utilisateur .")
     print()
     print("-" * 60)
     login = input("  Login (Entrée pour continuer) : ").strip()
